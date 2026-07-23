@@ -176,6 +176,7 @@
 
     #define EM_G431KB
     #define EM_CORTEX_M4F
+    #define LL_ADC_MULTI_DUAL_REG_INTERL_FAST LL_ADC_MULTI_DUAL_REG_INTERL
 
     /*
      * =========layout=========
@@ -255,7 +256,12 @@
 #define SCPI_IDN4              "0"
 
 // calc helpers ----------------------------------------------------
-#define EM_ADC_ADDR(x)           (uint32_t)LL_ADC_DMA_GetRegAddr(x, LL_ADC_DMA_REG_REGULAR_DATA) // ADC DMA address
+#if defined(EM_ADC_DUALMODE) || defined(EM_ADC_INTERLEAVED)
+  #define EM_ADC_ADDR(x)           ((self->dualmode || self->interleaved) ? (uint32_t)LL_ADC_DMA_GetRegAddr(x, LL_ADC_DMA_REG_REGULAR_DATA_MULTI) : (uint32_t)LL_ADC_DMA_GetRegAddr(x, LL_ADC_DMA_REG_REGULAR_DATA))
+#else
+  #define EM_ADC_ADDR(x)           (uint32_t)LL_ADC_DMA_GetRegAddr(x, LL_ADC_DMA_REG_REGULAR_DATA) // ADC DMA address
+#endif
+
 #define EM_ADC_1CH_SMPL_TM(T,B)  ((1.0 / (double)EM_FREQ_ADCCLK) * ((double)T + (B))) // ADC 1 channel sampling time in seconds (T - smpl ticks, B - Tconv)
 #define EM_ADC_MAXZ(k,L)         (((k - 0.5) / ((double)EM_FREQ_ADCCLK * EM_ADC_C_F * (L))) - EM_ADC_R_OHM) // ADC max input impedance (k - smpl ticks, L - ln2^(N+2))
 #define EM_DMA_LAST_IDX(x,y,z)   (get_last_circ_idx((x - LL_DMA_GetDataLength(z, y)), x)) // last DMA index from circular buffer (x - buff len, y - dma ch, z - dma)
