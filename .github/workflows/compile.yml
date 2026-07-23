@@ -1,0 +1,38 @@
+name: Compile Project
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            qtcreator \
+            qtbase5-dev \
+            qt5-qmake \
+            make \
+            g++ \
+            libgl1-mesa-dev \
+            qtmultimedia5-dev \
+            libqt5serialport5-dev \
+            qttools5-dev-tools \
+            qttools5-dev \
+            libfftw3-dev
+
+      - name: Prepare library directory
+        run: |
+          mkdir -p src/software/EMBO/lib/ubuntu_18
+          ln -sf /usr/lib/x86_64-linux-gnu/libfftw3.a src/software/EMBO/lib/ubuntu_18/libfftw3.a
+
+      - name: Compile PC Application
+        run: |
+          cd src/software/EMBO
+          qmake EMBO.pro
+          sudo make -j$(nproc)
