@@ -12,6 +12,10 @@
 #include "periph/periph_dma.h"
 #include "util.h"
 
+#ifndef LL_ADC_MULTI_DUAL_REG_INTERL_FAST
+  #define LL_ADC_MULTI_DUAL_REG_INTERL_FAST LL_ADC_MULTI_DUAL_REG_INTERL
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -166,6 +170,8 @@ int daq_mem_set(daq_data_t* self, uint16_t mem_per_ch)
     if (self->set.bits == B12)
         max_len /= 2;
 
+    int chans = self->set.ch1_en + self->set.ch2_en + self->set.ch3_en + self->set.ch4_en; // Fix undeclared chans compile error for multimode
+
     if (self->mode != LA)
     {
         uint8_t is_vcc = (self->mode == VM ? 1 : 0);
@@ -177,7 +183,7 @@ int daq_mem_set(daq_data_t* self, uint16_t mem_per_ch)
             if (mem_per_ch < 1 || (mem_per_ch * len1) > max_len)
                 return -2;
 
-            daq_malloc(self, &self->buff1, mem_per_ch * len1, EM_MEM_RESERVE, len1, EM_ADC_ADDR(EM_ADC1), EM_DMA_CH_ADC1, EM_DMA_ADC1, self->set.bits);
+            daq_malloc(self, &self->buff1, mem_per_ch * len1, EM_MEM_RESERVE, len1, EM_ADC_ADDR(self, EM_ADC1), EM_DMA_CH_ADC1, EM_DMA_ADC1, self->set.bits);
 
         #elif defined(EM_ADC_MODE_ADC12)
 
@@ -198,9 +204,9 @@ int daq_mem_set(daq_data_t* self, uint16_t mem_per_ch)
                 return -2;
 
             if (len1 > 0)
-                daq_malloc(self, &self->buff1, mem_per_ch * len1, EM_MEM_RESERVE, len1, EM_ADC_ADDR(EM_ADC1), EM_DMA_CH_ADC1, EM_DMA_ADC1, self->set.bits);
+                daq_malloc(self, &self->buff1, mem_per_ch * len1, EM_MEM_RESERVE, len1, EM_ADC_ADDR(self, EM_ADC1), EM_DMA_CH_ADC1, EM_DMA_ADC1, self->set.bits);
             if (len2 > 0)
-                daq_malloc(self, &self->buff2, mem_per_ch * len2, EM_MEM_RESERVE, len2, EM_ADC_ADDR(EM_ADC2), EM_DMA_CH_ADC2, EM_DMA_ADC2, self->set.bits);
+                daq_malloc(self, &self->buff2, mem_per_ch * len2, EM_MEM_RESERVE, len2, EM_ADC_ADDR(self, EM_ADC2), EM_DMA_CH_ADC2, EM_DMA_ADC2, self->set.bits);
 
         #elif defined(EM_ADC_MODE_ADC1234)
 
@@ -225,13 +231,13 @@ int daq_mem_set(daq_data_t* self, uint16_t mem_per_ch)
                 return -2;
 
             if (len1 > 0)
-                daq_malloc(self, &self->buff1, mem_per_ch * len1, EM_MEM_RESERVE, len1, EM_ADC_ADDR(EM_ADC1), EM_DMA_CH_ADC1, EM_DMA_ADC1, self->set.bits);
+                daq_malloc(self, &self->buff1, mem_per_ch * len1, EM_MEM_RESERVE, len1, EM_ADC_ADDR(self, EM_ADC1), EM_DMA_CH_ADC1, EM_DMA_ADC1, self->set.bits);
             if (len2 > 0)
-                daq_malloc(self, &self->buff2, mem_per_ch * len2, EM_MEM_RESERVE, len2, EM_ADC_ADDR(EM_ADC2), EM_DMA_CH_ADC2, EM_DMA_ADC2, self->set.bits);
+                daq_malloc(self, &self->buff2, mem_per_ch * len2, EM_MEM_RESERVE, len2, EM_ADC_ADDR(self, EM_ADC2), EM_DMA_CH_ADC2, EM_DMA_ADC2, self->set.bits);
             if (len3 > 0)
-                daq_malloc(self, &self->buff3, mem_per_ch * len3, EM_MEM_RESERVE, len3, EM_ADC_ADDR(EM_ADC3), EM_DMA_CH_ADC3, EM_DMA_ADC3, self->set.bits);
+                daq_malloc(self, &self->buff3, mem_per_ch * len3, EM_MEM_RESERVE, len3, EM_ADC_ADDR(self, EM_ADC3), EM_DMA_CH_ADC3, EM_DMA_ADC3, self->set.bits);
             if (len4 > 0)
-                daq_malloc(self, &self->buff4, mem_per_ch * len4, EM_MEM_RESERVE, len4, EM_ADC_ADDR(EM_ADC4), EM_DMA_CH_ADC4, EM_DMA_ADC4, self->set.bits);
+                daq_malloc(self, &self->buff4, mem_per_ch * len4, EM_MEM_RESERVE, len4, EM_ADC_ADDR(self, EM_ADC4), EM_DMA_CH_ADC4, EM_DMA_ADC4, self->set.bits);
 
         #endif
     }
@@ -402,9 +408,9 @@ int daq_fs_set(daq_data_t* self, int fs)
 {
     uint8_t is_vcc = (self->mode == VM ? 1 : 0);
     int fs2 = fs;
+    int channs = self->set.ch1_en + self->set.ch2_en + self->set.ch3_en + self->set.ch4_en + is_vcc;
 
     #if defined(EM_ADC_MODE_ADC1)
-        int channs = self->set.ch1_en + self->set.ch2_en + self->set.ch3_en + self->set.ch4_en + is_vcc;
         //double scope_max_fs = 1.0 / (EM_ADC_1CH_SMPL_TM(EM_ADC_SMPLT_MAX_N, (self->set.bits == B12 ? EM_ADC_TCONV12 : EM_ADC_TCONV8)) * (float)(channs));
         double scope_max_fs = (self->set.bits == B12 ? EM_DAQ_MAX_B12_FS : EM_DAQ_MAX_B8_FS) / (double)(channs);
 

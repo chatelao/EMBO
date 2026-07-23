@@ -108,8 +108,8 @@
 //#define EM_ADC_MODE_ADC1234                                  // 4 full ADCs (4 DMA)         - verified
 #define EM_ADC_BIT12                                           // 12-bit mode available       - verified
 #define EM_ADC_BIT8                                            // 8-bit mode available        - verified
-//#define EM_ADC_INTERLEAVED                                   // interleaved mode available  - TODO
-//#define EM_ADC_DUALMODE                                      // dual mode available         - TODO
+#define EM_ADC_INTERLEAVED                                   // interleaved mode available
+#define EM_ADC_DUALMODE                                      // dual mode available
 
 #define EM_VREF                3300                            // main voltage reference in mV
 #define EM_ADC_VREF_CAL        *((uint16_t*)VREFINT_CAL_ADDR)  // Vref cal value
@@ -171,7 +171,7 @@
 #define EM_DAQ_MAX_B12_FS      5000000    // DAQ ADC max fs per 1 channel - 12 bit
 #define EM_DAQ_MAX_B8_FS       5000000    // DAQ ADC max fs per 1 channel - 8 bit TODO
 #define EM_PWM_MAX_F           16000000   // PWM max freq
-#define EM_SGEN_MAX_F          0          // SGEN max output freq.
+#define EM_SGEN_MAX_F          EM_DAC_TIM_MAX_F          // SGEN max output freq.
 #define EM_CNTR_MAX_F          37000000   // CNTR max input frequency
 #define EM_MEM_RESERVE         10         // DAQ circ buff memory reserve (min 2)
 

@@ -199,6 +199,32 @@
 
     #include "cfg_g431kb.h"
 
+#elif defined(STM32F446xx)
+/*.................................................. F446RE .................................................*/
+
+    #define EM_F446RE
+    #define EM_CORTEX_M4F
+
+    /*
+     * =========layout=========
+     *  DAQ CH1 ........... PA0 (ADC123_IN0)
+     *  DAQ CH2 ........... PA1 (ADC123_IN1)
+     *  DAQ CH3 ........... PA4 (ADC12_IN4)
+     *  DAQ CH4 ........... PA5 (ADC12_IN5)
+     *  PWM CH1 ........... PB10 (TIM2_CH3)
+     *  PWM CH2 ........... PB8  (TIM4_CH3)
+     *  CNTR .............. PC9  (TIM8_CH4)
+     *  DAC CH1 ........... PA4  (DAC_OUT1)
+     *  DAC CH2 ........... PA5  (DAC_OUT2)
+     *  UART RX ........... PA3  (USART2_RX)
+     *  UART TX ........... PA2  (USART2_TX)
+     *  USB D- ............ PA11 (USB_OTG_FS_DM)
+     *  USB D+ ............ PA12 (USB_OTG_FS_DP)
+     *  =======================
+     */
+
+    #include "cfg_f446re.h"
+
 #endif
 
 #if !defined(EM_DAQ_4CH) && (defined(EM_ADC_MODE_ADC12) || defined(EM_ADC_MODE_ADC1234))
@@ -255,7 +281,11 @@
 #define SCPI_IDN4              "0"
 
 // calc helpers ----------------------------------------------------
-#define EM_ADC_ADDR(x)           (uint32_t)LL_ADC_DMA_GetRegAddr(x, LL_ADC_DMA_REG_REGULAR_DATA) // ADC DMA address
+#if defined(EM_ADC_DUALMODE) || defined(EM_ADC_INTERLEAVED)
+  #define EM_ADC_ADDR(self_ptr, x)           (((self_ptr)->dualmode || (self_ptr)->interleaved) ? (uint32_t)LL_ADC_DMA_GetRegAddr(x, LL_ADC_DMA_REG_REGULAR_DATA_MULTI) : (uint32_t)LL_ADC_DMA_GetRegAddr(x, LL_ADC_DMA_REG_REGULAR_DATA))
+#else
+  #define EM_ADC_ADDR(self_ptr, x)           (uint32_t)LL_ADC_DMA_GetRegAddr(x, LL_ADC_DMA_REG_REGULAR_DATA) // ADC DMA address
+#endif
 #define EM_ADC_1CH_SMPL_TM(T,B)  ((1.0 / (double)EM_FREQ_ADCCLK) * ((double)T + (B))) // ADC 1 channel sampling time in seconds (T - smpl ticks, B - Tconv)
 #define EM_ADC_MAXZ(k,L)         (((k - 0.5) / ((double)EM_FREQ_ADCCLK * EM_ADC_C_F * (L))) - EM_ADC_R_OHM) // ADC max input impedance (k - smpl ticks, L - ln2^(N+2))
 #define EM_DMA_LAST_IDX(x,y,z)   (get_last_circ_idx((x - LL_DMA_GetDataLength(z, y)), x)) // last DMA index from circular buffer (x - buff len, y - dma ch, z - dma)
