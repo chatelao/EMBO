@@ -183,7 +183,7 @@ int daq_mem_set(daq_data_t* self, uint16_t mem_per_ch)
             if (mem_per_ch < 1 || (mem_per_ch * len1) > max_len)
                 return -2;
 
-            daq_malloc(self, &self->buff1, mem_per_ch * len1, EM_MEM_RESERVE, len1, EM_ADC_ADDR(EM_ADC1), EM_DMA_CH_ADC1, EM_DMA_ADC1, self->set.bits);
+            daq_malloc(self, &self->buff1, mem_per_ch * len1, EM_MEM_RESERVE, len1, EM_ADC_ADDR(self, EM_ADC1), EM_DMA_CH_ADC1, EM_DMA_ADC1, self->set.bits);
 
         #elif defined(EM_ADC_MODE_ADC12)
 
@@ -204,9 +204,9 @@ int daq_mem_set(daq_data_t* self, uint16_t mem_per_ch)
                 return -2;
 
             if (len1 > 0)
-                daq_malloc(self, &self->buff1, mem_per_ch * len1, EM_MEM_RESERVE, len1, EM_ADC_ADDR(EM_ADC1), EM_DMA_CH_ADC1, EM_DMA_ADC1, self->set.bits);
+                daq_malloc(self, &self->buff1, mem_per_ch * len1, EM_MEM_RESERVE, len1, EM_ADC_ADDR(self, EM_ADC1), EM_DMA_CH_ADC1, EM_DMA_ADC1, self->set.bits);
             if (len2 > 0)
-                daq_malloc(self, &self->buff2, mem_per_ch * len2, EM_MEM_RESERVE, len2, EM_ADC_ADDR(EM_ADC2), EM_DMA_CH_ADC2, EM_DMA_ADC2, self->set.bits);
+                daq_malloc(self, &self->buff2, mem_per_ch * len2, EM_MEM_RESERVE, len2, EM_ADC_ADDR(self, EM_ADC2), EM_DMA_CH_ADC2, EM_DMA_ADC2, self->set.bits);
 
         #elif defined(EM_ADC_MODE_ADC1234)
 
@@ -231,13 +231,13 @@ int daq_mem_set(daq_data_t* self, uint16_t mem_per_ch)
                 return -2;
 
             if (len1 > 0)
-                daq_malloc(self, &self->buff1, mem_per_ch * len1, EM_MEM_RESERVE, len1, EM_ADC_ADDR(EM_ADC1), EM_DMA_CH_ADC1, EM_DMA_ADC1, self->set.bits);
+                daq_malloc(self, &self->buff1, mem_per_ch * len1, EM_MEM_RESERVE, len1, EM_ADC_ADDR(self, EM_ADC1), EM_DMA_CH_ADC1, EM_DMA_ADC1, self->set.bits);
             if (len2 > 0)
-                daq_malloc(self, &self->buff2, mem_per_ch * len2, EM_MEM_RESERVE, len2, EM_ADC_ADDR(EM_ADC2), EM_DMA_CH_ADC2, EM_DMA_ADC2, self->set.bits);
+                daq_malloc(self, &self->buff2, mem_per_ch * len2, EM_MEM_RESERVE, len2, EM_ADC_ADDR(self, EM_ADC2), EM_DMA_CH_ADC2, EM_DMA_ADC2, self->set.bits);
             if (len3 > 0)
-                daq_malloc(self, &self->buff3, mem_per_ch * len3, EM_MEM_RESERVE, len3, EM_ADC_ADDR(EM_ADC3), EM_DMA_CH_ADC3, EM_DMA_ADC3, self->set.bits);
+                daq_malloc(self, &self->buff3, mem_per_ch * len3, EM_MEM_RESERVE, len3, EM_ADC_ADDR(self, EM_ADC3), EM_DMA_CH_ADC3, EM_DMA_ADC3, self->set.bits);
             if (len4 > 0)
-                daq_malloc(self, &self->buff4, mem_per_ch * len4, EM_MEM_RESERVE, len4, EM_ADC_ADDR(EM_ADC4), EM_DMA_CH_ADC4, EM_DMA_ADC4, self->set.bits);
+                daq_malloc(self, &self->buff4, mem_per_ch * len4, EM_MEM_RESERVE, len4, EM_ADC_ADDR(self, EM_ADC4), EM_DMA_CH_ADC4, EM_DMA_ADC4, self->set.bits);
 
         #endif
     }

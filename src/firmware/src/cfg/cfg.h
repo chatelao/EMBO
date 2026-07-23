@@ -282,9 +282,9 @@
 
 // calc helpers ----------------------------------------------------
 #if defined(EM_ADC_DUALMODE) || defined(EM_ADC_INTERLEAVED)
-  #define EM_ADC_ADDR(x)           ((self->dualmode || self->interleaved) ? (uint32_t)LL_ADC_DMA_GetRegAddr(x, LL_ADC_DMA_REG_REGULAR_DATA_MULTI) : (uint32_t)LL_ADC_DMA_GetRegAddr(x, LL_ADC_DMA_REG_REGULAR_DATA))
+  #define EM_ADC_ADDR(self_ptr, x)           (((self_ptr)->dualmode || (self_ptr)->interleaved) ? (uint32_t)LL_ADC_DMA_GetRegAddr(x, LL_ADC_DMA_REG_REGULAR_DATA_MULTI) : (uint32_t)LL_ADC_DMA_GetRegAddr(x, LL_ADC_DMA_REG_REGULAR_DATA))
 #else
-  #define EM_ADC_ADDR(x)           (uint32_t)LL_ADC_DMA_GetRegAddr(x, LL_ADC_DMA_REG_REGULAR_DATA) // ADC DMA address
+  #define EM_ADC_ADDR(self_ptr, x)           (uint32_t)LL_ADC_DMA_GetRegAddr(x, LL_ADC_DMA_REG_REGULAR_DATA) // ADC DMA address
 #endif
 #define EM_ADC_1CH_SMPL_TM(T,B)  ((1.0 / (double)EM_FREQ_ADCCLK) * ((double)T + (B))) // ADC 1 channel sampling time in seconds (T - smpl ticks, B - Tconv)
 #define EM_ADC_MAXZ(k,L)         (((k - 0.5) / ((double)EM_FREQ_ADCCLK * EM_ADC_C_F * (L))) - EM_ADC_R_OHM) // ADC max input impedance (k - smpl ticks, L - ln2^(N+2))
