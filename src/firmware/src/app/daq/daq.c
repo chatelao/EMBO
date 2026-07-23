@@ -166,6 +166,8 @@ int daq_mem_set(daq_data_t* self, uint16_t mem_per_ch)
     if (self->set.bits == B12)
         max_len /= 2;
 
+    int chans = self->set.ch1_en + self->set.ch2_en + self->set.ch3_en + self->set.ch4_en; // Fix undeclared chans compile error for multimode
+
     if (self->mode != LA)
     {
         uint8_t is_vcc = (self->mode == VM ? 1 : 0);
