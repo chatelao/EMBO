@@ -24,7 +24,9 @@ jobs:
             libqt5serialport5-dev \
             qttools5-dev-tools \
             qttools5-dev \
-            libfftw3-dev
+            libfftw3-dev \
+            gcc-arm-none-eabi \
+            binutils-arm-none-eabi
 
       - name: Prepare library directory
         run: |
@@ -36,3 +38,7 @@ jobs:
           cd src/software/EMBO
           qmake EMBO.pro
           sudo make -j$(nproc)
+
+      - name: Compile Firmware for all targets
+        run: |
+          python3 scripts/compile_firmware.py
