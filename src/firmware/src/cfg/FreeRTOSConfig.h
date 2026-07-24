@@ -83,7 +83,7 @@ header file. */
 #define configASSERT( x ) if ((x) == 0) {taskDISABLE_INTERRUPTS(); for( ;; );}
 
 
-#if defined(EM_CORTEX_M3) || defined(EM_CORTEX_M4F) || defined(EM_CORTEX_M7)
+#if defined(EM_CORTEX_M3) || defined(EM_CORTEX_M4F) || defined(EM_CORTEX_M7) || defined(EM_CORTEX_M33)
 
 /* Cortex-M specific definitions. */
 #ifdef __NVIC_PRIO_BITS
