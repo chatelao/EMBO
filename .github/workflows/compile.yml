@@ -99,9 +99,16 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         run: |
           # Package Firmware Binaries
-          mkdir -p firmware
-          find src/firmware/board \( -name "*.bin" -o -name "*.hex" \) -exec cp {} firmware/ \;
-          zip -r embo-firmware.zip firmware
+          for dir in src/firmware/board/*; do
+            if [ -d "$dir" ]; then
+              target=$(basename "$dir")
+              files=$(find "$dir" -type f \( -name "*.bin" -o -name "*.hex" \))
+              if [ -n "$files" ]; then
+                echo "Packaging $target..."
+                zip -j "embo-firmware-${target}.zip" $files
+              fi
+            fi
+          done
 
           # Package PC Application
           tar -czf EMBO-linux-x64.tar.gz -C src/software/EMBO/build/linux/release EMBO
@@ -111,7 +118,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
-            embo-firmware.zip
+            embo-firmware-*.zip
             EMBO-linux-x64.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
