@@ -71,3 +71,72 @@ jobs:
             EMBO-linux-x64.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-windows:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up MinGW
+        uses: egor-tensin/setup-mingw@v2
+        with:
+          platform: x64
+          static: 0
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: '5.15.2'
+          arch: 'win64_mingw81'
+
+      - name: Prepare library directory
+        run: |
+          New-Item -ItemType Directory -Force -Path src/software/EMBO/lib/win64
+          Copy-Item -Path src/software/installer/packages/com.ctujakubparez.embo/data/libfftw3-3.dll -Destination src/software/EMBO/lib/win64/libfftw3-3.dll -Force
+        shell: powershell
+
+      - name: Compile qBreakpad
+        run: |
+          cd src/software/EMBO/__crashhandler/handler
+          qmake handler.pro CONFIG+=release
+          mingw32-make -j2
+        shell: cmd
+
+      - name: Copy qBreakpad library
+        run: |
+          Get-ChildItem -Path src/software/EMBO/__crashhandler/handler -Filter libqBreakpad.a -Recurse | Copy-Item -Destination src/software/EMBO/lib/win64/libqBreakpad.a -Force
+        shell: powershell
+
+      - name: Compile PC Application
+        run: |
+          cd src/software/EMBO
+          qmake EMBO.pro CONFIG+=release
+          mingw32-make -j2
+        shell: cmd
+
+      - name: Deploy Qt DLLs
+        run: |
+          cd src/software/EMBO/build-win64/release
+          windeployqt EMBO.exe
+        shell: cmd
+
+      - name: Package Release Assets
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          New-Item -ItemType Directory -Force -Path temp/EMBO
+          Copy-Item -Path src/software/EMBO/build-win64/release/* -Destination temp/EMBO -Recurse -Force
+          Compress-Archive -Path temp/EMBO -DestinationPath EMBO-win-x64.zip
+        shell: powershell
+
+      - name: Upload Release Assets
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            EMBO-win-x64.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
