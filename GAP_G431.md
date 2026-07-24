@@ -19,21 +19,36 @@ This document provides a comprehensive, production-ready Gap Analysis and integr
 
 ## 2. Identified Gaps & Technical Resolutions
 
-To transition G431 support from experimental to a stable release, the following technical gaps must be resolved with the concrete, non-open designs outlined below:
+The following table and detailed sections document the current resolution status of the experimental G431 support to transition it to a fully stable production release:
 
-### Gap 2.1: Disabled Signal Generator Max Frequency (`EM_SGEN_MAX_F`)
-* **Problem:** In `cfg_g431kb.h`, `EM_SGEN_MAX_F` is hardcoded to `0`, practically disabling the DAC-based Signal Generator.
+### Progress Overview & Status Table
+
+| Gap ID | Description | Status | Target/Resolution File | Verification Details |
+|---|---|---|---|---|
+| **Gap 2.1** | Disabled Signal Generator Max Frequency | ✅ Solved / Fully Implemented | `src/firmware/src/cfg/cfg_g431kb.h` | Set `EM_SGEN_MAX_F` to `EM_DAC_TIM_MAX_F` (4.5 MHz). |
+| **Gap 2.2** | Missing Dual & Interleaved ADC Support (`chans` Compile Error) | ✅ Solved / Fully Implemented | `src/firmware/src/app/daq/daq.c` | Declared and initialized `chans` variable at the beginning of `daq_mem_set()`. |
+| **Gap 2.3** | Multimode ADC DMA Register Mapping | ✅ Solved / Fully Implemented | `src/firmware/src/cfg/cfg.h` | Macro `EM_ADC_ADDR(x)` updated to support Common Regular Data Register (`CDR`). |
+| **Gap 2.4** | DMA Request Multiplexer (DMAMUX) Routing Cleanliness | ✅ Solved / Fully Implemented | `src/firmware/board/STM32G431KB/Core/Src/main.c` & `stm32g4xx_hal_msp.c` | Conflict-free DMAMUX allocation assigned across all peripherals. |
+
+---
+
+### Gap 2.1: Disabled Signal Generator Max Frequency (`EM_SGEN_MAX_F`) — ✅ **Solved / Fully Implemented**
+* **Status:** Solved / Fully Implemented
+* **Problem:** In `cfg_g431kb.h`, `EM_SGEN_MAX_F` was hardcoded to `0`, practically disabling the DAC-based Signal Generator.
 * **Resolution:** Set `EM_SGEN_MAX_F` to `EM_DAC_TIM_MAX_F` (`4500000` / 4.5 MHz). Since the APB1 clock is configured to 150 MHz, TIM6/TIM7 can easily trigger the DAC DMA transfers up to this frequency safely.
 
-### Gap 2.2: Missing Dual & Interleaved ADC Support (Undeclared `chans` Compiler Error)
+### Gap 2.2: Missing Dual & Interleaved ADC Support (Undeclared `chans` Compiler Error) — ✅ **Solved / Fully Implemented**
+* **Status:** Solved / Fully Implemented
 * **Problem:** If `#define EM_ADC_INTERLEAVED` and `#define EM_ADC_DUALMODE` are uncommented in `cfg_g431kb.h`, compilation fails in `daq.c`. Specifically, inside `daq_mem_set()`, the variable `chans` is used under preprocessor blocks but is never defined or declared in that scope.
 * **Resolution:** Define `int chans = self->set.ch1_en + self->set.ch2_en + self->set.ch3_en + self->set.ch4_en;` at the beginning of `daq_mem_set()` to resolve the compiler error and allow correct memory allocation.
 
-### Gap 2.3: Multimode ADC DMA Register Mapping
+### Gap 2.3: Multimode ADC DMA Register Mapping — ✅ **Solved / Fully Implemented**
+* **Status:** Solved / Fully Implemented
 * **Problem:** In regular single-ADC mode, DMA transfers read from the individual ADC Data Register (`DR`). In dual/interleaved multimode, however, both master and slave conversion results are packed into a single 32-bit register on the master ADC called the **Common Regular Data Register (CDR)**. Reading a 32-bit word from `&ADC1->DR` is hardware-invalid or yields incomplete/corrupted results.
 * **Resolution:** Redefine the `EM_ADC_ADDR(x)` macro to conditionally fetch the Common Regular Data Register (using `LL_ADC_DMA_REG_REGULAR_DATA_MULTI`) when dual/interleaved modes are active on the master ADC.
 
-### Gap 2.4: DMA Request Multiplexer (DMAMUX) & Channel Routing Cleanliness
+### Gap 2.4: DMA Request Multiplexer (DMAMUX) & Channel Routing Cleanliness — ✅ **Solved / Fully Implemented**
+* **Status:** Solved / Fully Implemented
 * **Problem:** Misconfigured DMA requests or overlapping channels can cause collisions or sample drops.
 * **Resolution:** Verify and commit to a conflict-free, non-overlapping DMA channel allocation across DMA1 and DMA2. All G431 peripheral DMA requests must be routed via DMAMUX without any channel overlap:
   1. `EM_DMA_CH_ADC1`  -> `DMA1 Channel 1` (Triggered by `LL_DMAMUX_REQ_ADC1`)
