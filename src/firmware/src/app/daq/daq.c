@@ -166,6 +166,8 @@ int daq_mem_set(daq_data_t* self, uint16_t mem_per_ch)
     if (self->set.bits == B12)
         max_len /= 2;
 
+    int chans = self->set.ch1_en + self->set.ch2_en + self->set.ch3_en + self->set.ch4_en; // Fix undeclared chans compile error for multimode
+
     if (self->mode != LA)
     {
         uint8_t is_vcc = (self->mode == VM ? 1 : 0);
@@ -402,9 +404,9 @@ int daq_fs_set(daq_data_t* self, int fs)
 {
     uint8_t is_vcc = (self->mode == VM ? 1 : 0);
     int fs2 = fs;
+    int channs = self->set.ch1_en + self->set.ch2_en + self->set.ch3_en + self->set.ch4_en + is_vcc;
 
     #if defined(EM_ADC_MODE_ADC1)
-        int channs = self->set.ch1_en + self->set.ch2_en + self->set.ch3_en + self->set.ch4_en + is_vcc;
         //double scope_max_fs = 1.0 / (EM_ADC_1CH_SMPL_TM(EM_ADC_SMPLT_MAX_N, (self->set.bits == B12 ? EM_ADC_TCONV12 : EM_ADC_TCONV8)) * (float)(channs));
         double scope_max_fs = (self->set.bits == B12 ? EM_DAQ_MAX_B12_FS : EM_DAQ_MAX_B8_FS) / (double)(channs);
 
