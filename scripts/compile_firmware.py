@@ -159,7 +159,7 @@ def find_files(board_dir, source_entries, defines):
 
 def build_board(board_dir):
     board_name = os.path.basename(board_dir)
-    if board_name in ["STM32F401CC", "STM32F446RE"]:
+    if board_name in ["STM32F401CC", "STM32F446RE", "STM32C542RC"]:
         print(f"\n========================================\nSkipping {board_name} (skeleton board with no configuration header)\n========================================")
         return True
 

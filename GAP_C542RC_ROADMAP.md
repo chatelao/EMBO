@@ -8,7 +8,7 @@ This document outlines the phased roadmap to implement full support for the conc
 
 | Phase | Description | Status |
 | :--- | :--- | :---: |
-| Phase 1 | Project Environment & LL Drivers Import | ⏳ |
+| Phase 1 | Project Environment & LL Drivers Import | ✅ |
 | Phase 2 | Board-Specific Configuration Header Integration | ⏳ |
 | Phase 3 | Shared Code & System Integration | ⏳ |
 | Phase 4 | Verification & Continuous Integration Updates | ⏳ |
@@ -28,13 +28,13 @@ This document outlines the phased roadmap to implement full support for the conc
 ### Phase 1: Project Environment & LL Drivers Import
 This phase focuses on creating the target board directory structure and importing required LL (Low-Level) driver files.
 
-- [ ] **Task 1.1: Create Board Directory Structure**
-  - [ ] Subtask 1.1.1: Create directory `src/firmware/board/STM32C542RC/` patterned after existing STM32 board directories (e.g., `STM32G431KB`).
-  - [ ] Subtask 1.1.2: Add `.project` and `.cproject` files configured for STM32C542RCTx and ARM GCC.
-  - [ ] Subtask 1.1.3: Include target linker script `STM32C542RCTX_FLASH.ld` and startup file `startup_stm32c542xx.s`.
-- [ ] **Task 1.2: Import Low-Level (LL) Drivers**
-  - [ ] Subtask 1.2.1: Copy STM32CubeC5 LL driver headers to `src/firmware/board/STM32C542RC/Drivers/STM32C5xx_HAL_Driver/Inc/`.
-  - [ ] Subtask 1.2.2: Copy STM32CubeC5 LL driver source files to `src/firmware/board/STM32C542RC/Drivers/STM32C5xx_HAL_Driver/Src/`.
+- [x] **Task 1.1: Create Board Directory Structure**
+  - [x] Subtask 1.1.1: Create directory `src/firmware/board/STM32C542RC/` patterned after existing STM32 board directories (e.g., `STM32G431KB`).
+  - [x] Subtask 1.1.2: Add `.project` and `.cproject` files configured for STM32C542RCTx and ARM GCC.
+  - [x] Subtask 1.1.3: Include target linker script `STM32C542RCTX_FLASH.ld` and startup file `startup_stm32c542xx.s`.
+- [x] **Task 1.2: Import Low-Level (LL) Drivers**
+  - [x] Subtask 1.2.1: Copy STM32CubeC5 LL driver headers to `src/firmware/board/STM32C542RC/Drivers/STM32C5xx_HAL_Driver/Inc/`.
+  - [x] Subtask 1.2.2: Copy STM32CubeC5 LL driver source files to `src/firmware/board/STM32C542RC/Drivers/STM32C5xx_HAL_Driver/Src/`.
 
 ### Phase 2: Board-Specific Configuration Header Integration
 This phase defines the conflict-free pinout mapping, timers, DMAs, and stack size allocations.
