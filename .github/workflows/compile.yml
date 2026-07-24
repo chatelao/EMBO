@@ -13,15 +13,30 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    env:
+      CCACHE_DIR: ~/.cache/ccache
+      CCACHE_MAXSIZE: 500M
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Cache APT packages
+        uses: actions/cache@v4
+        with:
+          path: ~/apt-cache
+          key: ${{ runner.os }}-apt-${{ hashFiles('.github/workflows/compile.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-apt-
+
       - name: Install dependencies
         run: |
+          if [ -d ~/apt-cache ] && [ "$(ls -A ~/apt-cache)" ]; then
+            sudo cp -r ~/apt-cache/* /var/cache/apt/archives/ 2>/dev/null || true
+          fi
           sudo apt-get update
-          sudo apt-get install -y \
+          sudo apt-get install -y --no-install-recommends \
+            ccache \
             qtcreator \
             qtbase5-dev \
             qt5-qmake \
@@ -35,6 +50,30 @@ jobs:
             libfftw3-dev \
             gcc-arm-none-eabi \
             binutils-arm-none-eabi
+          mkdir -p ~/apt-cache
+          find /var/cache/apt/archives/ -name "*.deb" -exec cp {} ~/apt-cache/ \;
+
+      - name: Cache ccache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ccache
+          key: ${{ runner.os }}-ccache-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-ccache-
+
+      - name: Set up ccache
+        run: |
+          mkdir -p ~/ccache-bin
+          ln -s /usr/bin/ccache ~/ccache-bin/gcc
+          ln -s /usr/bin/ccache ~/ccache-bin/g++
+          ln -s /usr/bin/ccache ~/ccache-bin/cc
+          ln -s /usr/bin/ccache ~/ccache-bin/c++
+          ln -s /usr/bin/ccache ~/ccache-bin/arm-none-eabi-gcc
+          ln -s /usr/bin/ccache ~/ccache-bin/arm-none-eabi-g++
+          echo "$HOME/ccache-bin" >> $GITHUB_PATH
+
+      - name: Show ccache stats (before)
+        run: ccache -s
 
       - name: Prepare library directory
         run: |
@@ -44,12 +83,15 @@ jobs:
       - name: Compile PC Application
         run: |
           cd src/software/EMBO
-          qmake EMBO.pro
-          sudo make -j$(nproc)
+          qmake EMBO.pro QMAKE_POST_LINK=""
+          make -j$(nproc)
 
       - name: Compile Firmware for all targets
         run: |
           python3 scripts/compile_firmware.py
+
+      - name: Show ccache stats (after)
+        run: ccache -s
 
       - name: Package Release Assets
         if: startsWith(github.ref, 'refs/tags/')
