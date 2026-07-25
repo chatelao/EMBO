@@ -200,6 +200,32 @@
 
     #include "cfg_g431kb.h"
 
+#elif defined(STM32F446xx)
+/*.................................................. F446RE .................................................*/
+
+    #define EM_F446RE
+    #define EM_CORTEX_M4F
+
+    /*
+     * =========layout=========
+     *  DAQ CH1 ........... PA0 (ADC123_IN0) - both ADC + LA
+     *  DAQ CH2 ........... PA1 (ADC123_IN1) - both ADC + LA
+     *  DAQ CH3 ........... PA6 (ADC12_IN6)  - both ADC + LA
+     *  DAQ CH4 ........... PA7 (ADC12_IN7)  - both ADC + LA
+     *  PWM CH1 ........... PB10 (TIM2_CH3)
+     *  PWM CH2 ........... PB8  (TIM4_CH3)
+     *  CNTR .............. PC9  (TIM8_CH4)
+     *  DAC CH1 ........... PA4  (DAC_OUT1)
+     *  DAC CH2 ........... PA5  (DAC_OUT2)
+     *  UART RX ........... PA3  (USART2_RX)
+     *  UART TX ........... PA2  (USART2_TX)
+     *  USB D- ............ PA11 (USB_OTG_FS_DM)
+     *  USB D+ ............ PA12 (USB_OTG_FS_DP)
+     *  =======================
+     */
+
+    #include "cfg_f446re.h"
+
 #elif defined(STM32C542xx)
 /*.................................................. C542RC .................................................*/
 
