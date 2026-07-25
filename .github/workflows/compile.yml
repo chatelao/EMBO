@@ -92,6 +92,14 @@ jobs:
         run: |
           python3 scripts/compile_firmware.py
 
+      - name: Verify STM32C542RC build artifacts
+        run: |
+          if [ ! -f "src/firmware/board/STM32C542RC/build/STM32C542RC.bin" ] || [ ! -f "src/firmware/board/STM32C542RC/build/STM32C542RC.hex" ]; then
+            echo "Error: STM32C542RC build artifacts (.bin or .hex) were not generated!"
+            exit 1
+          fi
+          echo "Verified: STM32C542RC build artifacts successfully generated."
+
       - name: Show ccache stats (after)
         run: ccache -s
 
