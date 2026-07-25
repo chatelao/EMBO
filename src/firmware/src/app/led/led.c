@@ -22,6 +22,10 @@ void led_init(led_data_t* self)
     self->num = 0;
     self->enabled = EM_FALSE;
     self->uwtick_first = 0;
+    self->pwm_cnt = 0;
+    self->duty = 0;
+    self->breath_cnt = 0;
+    self->breath_dir = 1;
 }
 
 void led_set(led_data_t* self, uint8_t enable)
@@ -90,6 +94,52 @@ void led_blink_do(led_data_t* self, uint32_t _uwTick)
             led_toggle(self);
         }
     }
+    else
+    {
+        // Keepalive breathing effect using software PWM, gated by 1ms tick updates
+        if (_uwTick != self->uwtick_first)
+        {
+            self->uwtick_first = _uwTick;
 
+            self->pwm_cnt++;
+            if (self->pwm_cnt >= 10)
+            {
+                self->pwm_cnt = 0;
+            }
+
+            self->breath_cnt++;
+            if (self->breath_cnt >= 150) // 150 ticks * 1ms = 150ms per duty level
+            {
+                self->breath_cnt = 0;
+                if (self->breath_dir)
+                {
+                    self->duty++;
+                    if (self->duty >= 9)
+                    {
+                        self->duty = 9;
+                        self->breath_dir = 0;
+                    }
+                }
+                else
+                {
+                    self->duty--;
+                    if (self->duty <= 0)
+                    {
+                        self->duty = 0;
+                        self->breath_dir = 1;
+                    }
+                }
+            }
+
+            if (self->pwm_cnt < self->duty)
+            {
+                led_set(self, 1);
+            }
+            else
+            {
+                led_set(self, 0);
+            }
+        }
+    }
 }
 #endif
