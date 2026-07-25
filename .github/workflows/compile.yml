@@ -151,6 +151,7 @@ jobs:
         with:
           version: '5.15.2'
           arch: 'win64_mingw81'
+          py7zrversion: '>=0.22.0,<1.0.0'
 
       - name: Prepare library directory
         run: |

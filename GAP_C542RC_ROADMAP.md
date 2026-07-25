@@ -61,3 +61,6 @@ This final phase verifies compilation success and configures automatic build rul
   - [x] Subtask 4.1.1: Update `scripts/compile_firmware.py` to recognise and properly compile the `STM32C542RC` target using correct target CPU flags (`-mcpu=cortex-m33 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16`).
 - [x] **Task 4.2: CI/CD Pipeline Integration**
   - [x] Subtask 4.2.1: Update `.github/workflows/compile.yml` to automatically compile the new STM32C542RC target firmware during pipeline execution.
+- [x] **Task 4.3: Connection Handshake Programmatic Verification**
+  - [x] Subtask 4.3.1: Create connection verification Python script `scripts/verify_c542rc_connection.py` patterned after G431 verification logic to validate STM32C542RC firmware configurations (`cfg_c542rc.h` and `cfg.h`) and ensure full compatibility with the EMBO client connection sequence.
+  - [x] Subtask 4.3.2: Run the script and generate `C542RC_VERIFICATION.md` with the verification output.
