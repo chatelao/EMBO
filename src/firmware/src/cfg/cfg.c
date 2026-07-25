@@ -61,5 +61,14 @@
                                                       LL_ADC_SAMPLINGTIME_247CYCLES_5, LL_ADC_SAMPLINGTIME_640CYCLES_5};
     const float EM_ADC_SMPLT_N[EM_ADC_SMPLT_CNT]  = { 2.5, 6.5, 12.5, 24.5, 47.5, 92.5, 247.5, 640.5};
 
+#elif defined (STM32C542xx)
+
+    #include "stm32c5xx_ll_adc.h"
+
+    const uint32_t EM_ADC_SMPLT[EM_ADC_SMPLT_CNT] = { LL_ADC_SAMPLINGTIME_2CYCLES_5, LL_ADC_SAMPLINGTIME_6CYCLES_5, LL_ADC_SAMPLINGTIME_12CYCLES_5,
+                                                      LL_ADC_SAMPLINGTIME_24CYCLES_5, LL_ADC_SAMPLINGTIME_47CYCLES_5, LL_ADC_SAMPLINGTIME_92CYCLES_5,
+                                                      LL_ADC_SAMPLINGTIME_247CYCLES_5, LL_ADC_SAMPLINGTIME_640CYCLES_5};
+    const float EM_ADC_SMPLT_N[EM_ADC_SMPLT_CNT]  = { 2.5, 6.5, 12.5, 24.5, 47.5, 92.5, 247.5, 640.5};
+
 #endif
 

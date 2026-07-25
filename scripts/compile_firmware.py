@@ -21,6 +21,8 @@ def get_cpu_flags(mcu_name):
         return ["-mcpu=cortex-m0plus", "-mthumb", "-mfloat-abi=soft"]
     elif mcu.startswith("STM32L4"):
         return ["-mcpu=cortex-m4", "-mthumb", "-mfloat-abi=hard", "-mfpu=fpv4-sp-d16"]
+    elif mcu.startswith("STM32C5"):
+        return ["-mcpu=cortex-m33", "-mthumb", "-mfloat-abi=hard", "-mfpu=fpv4-sp-d16"]
     else:
         return ["-mcpu=cortex-m3", "-mthumb", "-mfloat-abi=soft"]
 
@@ -159,7 +161,7 @@ def find_files(board_dir, source_entries, defines):
 
 def build_board(board_dir):
     board_name = os.path.basename(board_dir)
-    if board_name in ["STM32F401CC", "STM32F446RE", "STM32C542RC"]:
+    if board_name in ["STM32F401CC", "STM32F446RE"]:
         print(f"\n========================================\nSkipping {board_name} (skeleton board with no configuration header)\n========================================")
         return True
 

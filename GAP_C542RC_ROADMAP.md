@@ -9,9 +9,9 @@ This document outlines the phased roadmap to implement full support for the conc
 | Phase | Description | Status |
 | :--- | :--- | :---: |
 | Phase 1 | Project Environment & LL Drivers Import | ✅ |
-| Phase 2 | Board-Specific Configuration Header Integration | ⏳ |
-| Phase 3 | Shared Code & System Integration | ⏳ |
-| Phase 4 | Verification & Continuous Integration Updates | ⏳ |
+| Phase 2 | Board-Specific Configuration Header Integration | ✅ |
+| Phase 3 | Shared Code & System Integration | ✅ |
+| Phase 4 | Verification & Continuous Integration Updates | 🚧 |
 
 ---
 
@@ -39,25 +39,25 @@ This phase focuses on creating the target board directory structure and importin
 ### Phase 2: Board-Specific Configuration Header Integration
 This phase defines the conflict-free pinout mapping, timers, DMAs, and stack size allocations.
 
-- [ ] **Task 2.1: Create Dedicated Configuration Header**
-  - [ ] Subtask 2.1.1: Create file `src/firmware/src/cfg/cfg_c542rc.h` with the exact configurations detailed in `GAP_C542RC_DESIGN.md` Section 5.1.
-  - [ ] Subtask 2.1.2: Map `EM_TIM_DAQ` to `TIM1` to ensure high-performance triggering via `TIM1_TRGO` on the fast 100 MHz APB2 clock domain.
-  - [ ] Subtask 2.1.3: Establish the conflict-free pin layout for DAQ/LA (PA0, PA1, PA6, PA7), DAC (PA4, PA5), and User LED (PB13).
-  - [ ] Subtask 2.1.4: Map the DMA channels for all active modules on DMA1 utilizing DMAMUX requests.
+- [x] **Task 2.1: Create Dedicated Configuration Header**
+  - [x] Subtask 2.1.1: Create file `src/firmware/src/cfg/cfg_c542rc.h` with the exact configurations detailed in `GAP_C542RC_DESIGN.md` Section 5.1.
+  - [x] Subtask 2.1.2: Map `EM_TIM_DAQ` to `TIM1` to ensure high-performance triggering via `TIM1_TRGO` on the fast 100 MHz APB2 clock domain.
+  - [x] Subtask 2.1.3: Establish the conflict-free pin layout for DAQ/LA (PA0, PA1, PA6, PA7), DAC (PA4, PA5), and User LED (PB13).
+  - [x] Subtask 2.1.4: Map the DMA channels for all active modules on DMA1 utilizing DMAMUX requests.
 
 ### Phase 3: Shared Code & System Integration
 This phase integrates the board configuration into the shared EMBO firmware base.
 
-- [ ] **Task 3.1: Update Configuration Header Dispatcher**
-  - [ ] Subtask 3.1.1: Modify `src/firmware/src/cfg/cfg.h` to include a preprocessor dispatch block for `STM32C542xx` / `EM_C542RC`.
-  - [ ] Subtask 3.1.2: Link the new `cfg_c542rc.h` when compiled under the target MCU define.
-- [ ] **Task 3.2: Map ADC Sampling Constants**
-  - [ ] Subtask 3.2.1: Update `src/firmware/src/cfg/cfg.c` with the specific ADC sampling time configurations for `STM32C542xx`.
+- [x] **Task 3.1: Update Configuration Header Dispatcher**
+  - [x] Subtask 3.1.1: Modify `src/firmware/src/cfg/cfg.h` to include a preprocessor dispatch block for `STM32C542xx` / `EM_C542RC`.
+  - [x] Subtask 3.1.2: Link the new `cfg_c542rc.h` when compiled under the target MCU define.
+- [x] **Task 3.2: Map ADC Sampling Constants**
+  - [x] Subtask 3.2.1: Update `src/firmware/src/cfg/cfg.c` with the specific ADC sampling time configurations for `STM32C542xx`.
 
 ### Phase 4: Verification & Continuous Integration Updates
 This final phase verifies compilation success and configures automatic build rules.
 
-- [ ] **Task 4.1: Compilation Script Configuration**
-  - [ ] Subtask 4.1.1: Update `scripts/compile_firmware.py` to recognise and properly compile the `STM32C542RC` target using correct target CPU flags (`-mcpu=cortex-m33 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16`).
+- [x] **Task 4.1: Compilation Script Configuration**
+  - [x] Subtask 4.1.1: Update `scripts/compile_firmware.py` to recognise and properly compile the `STM32C542RC` target using correct target CPU flags (`-mcpu=cortex-m33 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16`).
 - [ ] **Task 4.2: CI/CD Pipeline Integration**
   - [ ] Subtask 4.2.1: Update `.github/workflows/compile.yml` to automatically compile the new STM32C542RC target firmware during pipeline execution.
