@@ -16,8 +16,11 @@ Supported MCUs:
 - **STM32F103RE**
 - **STM32F303RE**
 - **STM32L412KB**
+- **STM32G431KB** (Nucleo-32 G431KB board)
+- **STM32F446RE** (Nucleo-64 F446RE board)
+- **STM32C542RC** (Nucleo-64 C542RC board, conceptual target)
 
-*More yet to come... (L0, G0, G4, F4)*
+*Experimental or partial support: L0, G0, L4*
 
 1. [Parameters](#1-Parameters)
 2. [Connection](#2-Connection)

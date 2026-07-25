@@ -7,7 +7,7 @@
 # EMBO - EMBedded Oscilloscope
 > **[Stáhnout](https://github.com/parezj/EMBO/releases)**  
 
-Aplikace EMBO se skládá ze 3 primárních přístrojů (4-kanálový osciloskop, logický analyzátor, voltmetr) a ze 3 sekundárních přístrojů (čítač, PWM and funkční generátor). Multiplatformní aplikace je zkompilována pro Windows, Linux a macOS. Stabilní firmware je dostupný pro STM32F103C8, STM32F103RE, STM32F303RE a STM32L412KB ve formátu HEX, další řady budou následovat. Osciloskop EMBO slouží jako levný a jednoduchý nástroj pro hromadnou výuku praktické elektroniky.
+Aplikace EMBO se skládá ze 3 primárních přístrojů (4-kanálový osciloskop, logický analyzátor, voltmetr) a ze 3 sekundárních přístrojů (čítač, PWM and funkční generátor). Multiplatformní aplikace je zkompilována pro Windows, Linux a macOS. Stabilní firmware je dostupný pro řady STM32 F1, F3, L4, G4, F4 a C5 ve formátu HEX, další řady budou následovat. Osciloskop EMBO slouží jako levný a jednoduchý nástroj pro hromadnou výuku praktické elektroniky.
 
 Tato práce byla vytvořena v rámci mé diplomové práce na [FEL ČVUT] (https://meas.fel.cvut.cz/) v Praze (Katedra měření) pod vedením doc. Fischera a za pomoci Ing. Hladíka z STMicroelectronics. Chtěl bych jim poděkovat za perfektní podporu. Celý projekt EMBO je zveřejněn pod licencí MIT. 
 
@@ -16,8 +16,11 @@ Podporované MCU:
 - **STM32F103RE**
 - **STM32F303RE**
 - **STM32L412KB**
+- **STM32G431KB** (deska Nucleo-32 G431KB)
+- **STM32F446RE** (deska Nucleo-64 F446RE)
+- **STM32C542RC** (deska Nucleo-64 C542RC, koncepční cíl)
 
-*Další příjdou brzy... (L0, G0, G4, F4)*
+*Experimentální nebo částečná podpora: L0, G0, L4*
 
 Kapitoly:
 1. [Parametry](#1-Parametry)
