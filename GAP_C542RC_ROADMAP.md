@@ -11,15 +11,15 @@ This document outlines the phased roadmap to implement full support for the conc
 | Phase 1 | Project Environment & LL Drivers Import | ✅ |
 | Phase 2 | Board-Specific Configuration Header Integration | ✅ |
 | Phase 3 | Shared Code & System Integration | ✅ |
-| Phase 4 | Verification & Continuous Integration Updates | 🚧 |
+| Phase 4 | Verification & Continuous Integration Updates | ✅ |
 
 ---
 
 ## Goals
-* ⏳ Core support for STM32C542RC microcontroller under EMBO.
-* ⏳ Conflict-free pin mapping for Oscilloscope (DAQ), Logic Analyzer (LA), Signal Generator (DAC), and on-board User LED.
-* ⏳ Setup of DMAMUX routes for clean request-to-channel mappings on DMA1.
-* ⏳ Successful firmware compilation using `arm-none-eabi-gcc` targeting ARM Cortex-M33 architecture.
+* ✅ Core support for STM32C542RC microcontroller under EMBO.
+* ✅ Conflict-free pin mapping for Oscilloscope (DAQ), Logic Analyzer (LA), Signal Generator (DAC), and on-board User LED.
+* ✅ Setup of DMAMUX routes for clean request-to-channel mappings on DMA1.
+* ✅ Successful firmware compilation using `arm-none-eabi-gcc` targeting ARM Cortex-M33 architecture.
 
 ---
 
@@ -59,5 +59,5 @@ This final phase verifies compilation success and configures automatic build rul
 
 - [x] **Task 4.1: Compilation Script Configuration**
   - [x] Subtask 4.1.1: Update `scripts/compile_firmware.py` to recognise and properly compile the `STM32C542RC` target using correct target CPU flags (`-mcpu=cortex-m33 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16`).
-- [ ] **Task 4.2: CI/CD Pipeline Integration**
-  - [ ] Subtask 4.2.1: Update `.github/workflows/compile.yml` to automatically compile the new STM32C542RC target firmware during pipeline execution.
+- [x] **Task 4.2: CI/CD Pipeline Integration**
+  - [x] Subtask 4.2.1: Update `.github/workflows/compile.yml` to automatically compile the new STM32C542RC target firmware during pipeline execution.
