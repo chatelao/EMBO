@@ -6,6 +6,7 @@
 #ifndef INC_PERIPH_DMA_H_
 #define INC_PERIPH_DMA_H_
 
+#include "cfg.h"
 #include "main.h"
 
 #include <stdint.h>

@@ -30,14 +30,22 @@ void led_set(led_data_t* self, uint8_t enable)
 
     #ifdef EM_LED_INVERTED
         if (self->enabled == EM_FALSE)
-            EM_LED_PORT->BRR |= (1 << EM_LED_PIN);  // 1
+            #if defined(STM32F446xx)
+                EM_LED_PORT->BSRR |= (1 << (EM_LED_PIN + 16));  // 1
+            #else
+                EM_LED_PORT->BRR |= (1 << EM_LED_PIN);  // 1
+            #endif
         else
             EM_LED_PORT->BSRR |= (1 << EM_LED_PIN);   // 0
     #else
         if (self->enabled == EM_FALSE)
             EM_LED_PORT->BSRR |= (1 << EM_LED_PIN);  // 1
         else
-            EM_LED_PORT->BRR |= (1 << EM_LED_PIN);   // 0
+            #if defined(STM32F446xx)
+                EM_LED_PORT->BSRR |= (1 << (EM_LED_PIN + 16));   // 0
+            #else
+                EM_LED_PORT->BRR |= (1 << EM_LED_PIN);   // 0
+            #endif
     #endif
 }
 
@@ -46,7 +54,11 @@ void led_toggle(led_data_t* self)
     if (self->enabled == EM_TRUE)
         EM_LED_PORT->BSRR |= (1 << EM_LED_PIN);  // 1
     else
-        EM_LED_PORT->BRR |= (1 << EM_LED_PIN);   // 0
+        #if defined(STM32F446xx)
+            EM_LED_PORT->BSRR |= (1 << (EM_LED_PIN + 16));   // 0
+        #else
+            EM_LED_PORT->BRR |= (1 << EM_LED_PIN);   // 0
+        #endif
     self->enabled = !self->enabled;
 }
 

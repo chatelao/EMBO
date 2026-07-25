@@ -8,7 +8,61 @@
 
 #if defined(EM_F446RE)
 
+#ifndef USE_FULL_LL_DRIVER
+#define USE_FULL_LL_DRIVER
+#endif
+
 #include "stm32f4xx.h"
+
+#define LL_DMA_DisableChannel  LL_DMA_DisableStream
+#define LL_DMA_EnableChannel   LL_DMA_EnableStream
+
+/* ADC Start/Stop triggers compatibility macros for STM32F4 */
+#define LL_ADC_REG_StartConversion(ADCx) \
+  do {                                   \
+    if (LL_ADC_REG_GetTriggerSource(ADCx) == LL_ADC_REG_TRIG_SOFTWARE) { \
+      LL_ADC_REG_StartConversionSWStart(ADCx); \
+    } else {                             \
+      LL_ADC_REG_StartConversionExtTrig(ADCx, LL_ADC_REG_TRIG_EXT_RISING); \
+    }                                    \
+  } while (0)
+
+#define LL_ADC_REG_StopConversion(ADCx) \
+  LL_ADC_REG_StartConversionExtTrig(ADCx, 0)
+
+/* Atomic operations for STM32F4 low-level drivers */
+#ifndef ATOMIC_SET_BIT
+#define ATOMIC_SET_BIT(REG, BIT)                             \
+  do {                                                       \
+    uint32_t primask;                                        \
+    primask = __get_PRIMASK();                               \
+    __disable_irq();                                         \
+    SET_BIT((REG), (BIT));                                   \
+    __set_PRIMASK(primask);                                  \
+  } while(0U)
+#endif
+
+#ifndef ATOMIC_CLEAR_BIT
+#define ATOMIC_CLEAR_BIT(REG, BIT)                           \
+  do {                                                       \
+    uint32_t primask;                                        \
+    primask = __get_PRIMASK();                               \
+    __disable_irq();                                         \
+    CLEAR_BIT((REG), (BIT));                                 \
+    __set_PRIMASK(primask);                                  \
+  } while(0U)
+#endif
+
+#ifndef ATOMIC_MODIFY_REG
+#define ATOMIC_MODIFY_REG(REG, CLEARMASK, SETMASK)           \
+  do {                                                       \
+    uint32_t primask;                                        \
+    primask = __get_PRIMASK();                               \
+    __disable_irq();                                         \
+    MODIFY_REG((REG), (CLEARMASK), (SETMASK));               \
+    __set_PRIMASK(primask);                                  \
+  } while(0U)
+#endif
 
 /*
  * =========layout=========
@@ -69,7 +123,7 @@
 #define EM_UART_RX_IRQHandler  USART2_IRQHandler
 #define EM_UART_CLEAR_FLAG(x)  LL_USART_ClearFlag_RXNE(x);
 #define EM_USB                 // USB Virtual COM port enabled
-#define EM_UART_POLLINIT       // Poll for initialization
+//#define EM_UART_POLLINIT       // Poll for initialization
 
 // LED -------------------------------------------------------------
 #define EM_LED
@@ -113,6 +167,10 @@
 #define EM_ADC_C_F             0.000000000006 // ~6pF
 #define EM_ADC_R_OHM           1500.0
 #define EM_ADC_SMPLT_CNT       8
+#define EM_ADC_SEQ_CONF                                        // fully configurable sequencer
+#define EM_ADC_CAL_EN                                          // calibration while enabled (dummy/not supported on F4 but bypasses calibration block)
+#define EM_ADC_EN_TICKS        10                              // dummy delay ticks for enabling ADC
+#define EM_ADC_AWD                                             // Analog Watchdog (empty on STM32F4/F1 as SetAnalogWDMonitChannels takes 2 arguments)
 
 // Timers ----------------------------------------------------------
 #define EM_TIM_DAQ             TIM9  // Replaced TIM15 with TIM9
