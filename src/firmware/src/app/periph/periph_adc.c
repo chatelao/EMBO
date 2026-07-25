@@ -67,6 +67,7 @@ void adc_init_calib(ADC_TypeDef* adc)
         //LL_ADC_DisableDeepPowerDown(adc);
         //for (int i = 0; i <  1000; ++i) asm("nop");
 
+        #if !defined(STM32F446xx)
         //LL_ADC_Disable(adc);
         const uint32_t dma_tx_mode = LL_ADC_REG_GetDMATransfer(adc);
         LL_ADC_REG_SetDMATransfer(adc, LL_ADC_REG_DMA_TRANSFER_NONE);
@@ -81,6 +82,7 @@ void adc_init_calib(ADC_TypeDef* adc)
         for (int i = 0; i <  10000; ++i) asm("nop");
 
         LL_ADC_REG_SetDMATransfer(adc, dma_tx_mode);
+        #endif
 
     #if !defined(EM_ADC_CAL_EN)
         LL_ADC_Enable(adc);

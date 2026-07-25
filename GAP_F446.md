@@ -14,7 +14,22 @@ This document provides a detailed Gap Analysis and integration guide for support
 
 ## 2. Identified Gaps
 
-### Gap 2.1: Missing Board Project & LL Drivers
+The following table and detailed sections document the current resolution status of the STM32F446RE target to achieve a fully stable production release:
+
+### Progress Overview & Status Table
+
+| Gap ID | Description | Status | Target/Resolution File | Verification Details |
+|---|---|---|---|---|
+| **Gap 2.1** | Missing Board Project & LL Drivers | ✅ Solved / Fully Implemented | `src/firmware/board/STM32F446RE/` | Core board configuration, correct linker (`STM32F446RETX_FLASH.ld`) and startup assembly imported, standard LL drivers copied to board directory. |
+| **Gap 2.2** | Missing Configuration Header `cfg_f446re.h` | ✅ Solved / Fully Implemented | `src/firmware/src/cfg/cfg_f446re.h` & `cfg.h` | Configuration header created with correct priorities, pinouts, and timing. Hooked up dispatcher. |
+| **Gap 2.3** | Timer Mapping & Invalid Trigger Suggestion | ✅ Solved / Fully Implemented | `src/firmware/src/cfg/cfg_f446re.h` | Re-mapped DAQ triggering to use physically connected high-frequency `TIM1` on fast APB2 clock domain. |
+| **Gap 2.4** | Pin Overlaps and Conflicts | ✅ Solved / Fully Implemented | `src/firmware/src/cfg/cfg_f446re.h` & `led.c` | Pin layout re-arranged to resolve concurrent scope/DAC/user LED conflicts. Bit Set Reset Register (BSRR) handled for LED pin toggling on STM32F4. |
+| **Gap 2.5** | Incorrect Counter (TIM8) DMA Mappings | ✅ Solved / Fully Implemented | `src/firmware/src/cfg/cfg_f446re.h` | Corrected counter DMA streams to `STREAM_7` and `STREAM_4` matching F446 request matrix. |
+| **Gap 2.6** | USB and Virtual COM Port Configuration | ✅ Solved / Fully Implemented | `src/firmware/board/STM32F446RE/` | ST USB Device middleware and stack correctly integrated, USB_OTG_FS pins mapped, and fully compiled. |
+
+---
+
+### Gap 2.1: Missing Board Project & LL Drivers — ✅ **Solved / Fully Implemented**
 Currently, there is no project directory for STM32F446RE under `src/firmware/board/`.
 * **Resolution:** Create `src/firmware/board/STM32F446RE/` directory, patterned after the `STM32F401CC` structure.
 * **Requirements:**
@@ -23,12 +38,12 @@ Currently, there is no project directory for STM32F446RE under `src/firmware/boa
   * Linker script `STM32F446RETX_FLASH.ld` and startup file `startup_stm32f446xx.s`.
   * **Crucial Dependency Note:** The existing `STM32F401CC` board directory in EMBO contains *only* HAL drivers (`stm32f4xx_hal_*.c/h`), whereas the shared EMBO codebase relies entirely on LL (Low-Level) drivers. For the STM32F446RE to compile, the ST STM32CubeF4 LL source and header files must be included in the board's `Drivers/STM32F4xx_HAL_Driver/` directory.
 
-### Gap 2.2: Missing Configuration Header `cfg_f446re.h`
+### Gap 2.2: Missing Configuration Header `cfg_f446re.h` — ✅ **Solved / Fully Implemented**
 Each supported board requires a specific configuration header inside `src/firmware/src/cfg/` to define pins, timers, DMAs, and capability limits.
 * **Resolution:** Create `src/firmware/src/cfg/cfg_f446re.h`.
 * **Requirements:** Add preprocessor checks in `src/firmware/src/cfg/cfg.h` to include it when `STM32F446xx` or `EM_F446RE` is defined.
 
-### Gap 2.3: Timer Mapping & Invalid TIM9/TIM12 Suggestion for ADC Triggering
+### Gap 2.3: Timer Mapping & Invalid TIM9/TIM12 Suggestion for ADC Triggering — ✅ **Solved / Fully Implemented**
 Standard EMBO boards use **TIM15** as `EM_TIM_DAQ` to trigger regular ADC acquisitions for the Oscilloscope. The STM32F446xx does not possess a TIM15 peripheral.
 * **Flaw in Previous Analysis:** Previous analyses proposed re-mapping `EM_TIM_DAQ` to `TIM9` or `TIM12`. However, **neither TIM9 nor TIM12 is physically connected to the ADC external trigger multiplexer (EXTSEL) on STM32F4 family microcontrollers**, making a TIM9/TIM12-based trigger concept completely unimplementable.
 * **Resolution:**
@@ -37,7 +52,7 @@ Standard EMBO boards use **TIM15** as `EM_TIM_DAQ` to trigger regular ADC acquis
   * **Option B (Alternative):** `TIM3` (runs on the APB1 clock domain up to 90MHz, triggering ADC via `TIM3_TRGO` / EXTSEL `1000`).
   * We configure the blueprint below using **TIM1** as the optimal, high-frequency trigger choice.
 
-### Gap 2.4: Pin Overlaps and Conflicts
+### Gap 2.4: Pin Overlaps and Conflicts — ✅ **Solved / Fully Implemented**
 * **Flaw in Previous Analysis:** Previous analyses mapped `DAQ CH3`/`CH4` and `DAC CH1`/`CH2` to the exact same pins (`PA4` and `PA5`), which prevents using the Oscilloscope and Signal Generator simultaneously. Additionally, the green user LED on the Nucleo board is hardwired to `PA5`, causing severe conflicts with both `DAC CH2` and `DAQ CH4`.
 * **Resolution:** Re-map `DAQ` (Scope) and `LA` (Logic Analyzer) pins to a separate set of GPIOA pins that do not conflict with the DAC or LED. The Logic Analyzer must reside on a single GPIO port to read the Input Data Register (IDR) simultaneously in a single DMA pass.
   * **Conflict-Free Pin Layout:**
@@ -50,12 +65,12 @@ Standard EMBO boards use **TIM15** as `EM_TIM_DAQ` to trigger regular ADC acquis
     * `EM_LED` ................. `PA5` (Green LED)
   This layout avoids pin conflicts and uses the standard Arduino analog/digital headers.
 
-### Gap 2.5: Incorrect Counter (TIM8) DMA Mappings
+### Gap 2.5: Incorrect Counter (TIM8) DMA Mappings — ✅ **Solved / Fully Implemented**
 * **Flaw in Previous Analysis:** Previous analyses defined `EM_DMA_CH_CNTR` (the capture DMA) as `LL_DMA_STREAM_3` on DMA2.
 * **Flaw:** On STM32F446, `TIM8_CH4` is routed **only to Stream 7 on DMA2 (Channel 7)**. It is physically impossible to route it to Stream 3.
 * **Resolution:** Correct `EM_DMA_CH_CNTR` to `LL_DMA_STREAM_7` (Channel 7). Set `EM_DMA_CH_CNTR2` (which handles `TIM8_CH3`) to `LL_DMA_STREAM_4` (Channel 7).
 
-### Gap 2.6: USB and Virtual COM Port Configuration
+### Gap 2.6: USB and Virtual COM Port Configuration — ✅ **Solved / Fully Implemented**
 The STM32F446 uses the USB OTG FS (On-The-Go Full Speed) peripheral for emulated Virtual COM Port (CDC class) communication.
 * **Resolution:** Include the `STM32_USB_Device_Library` middleware into the board project and configure `USB_DEVICE/` setup files mapping to the USB OTG FS pins (PA11 for DM, PA12 for DP).
 
