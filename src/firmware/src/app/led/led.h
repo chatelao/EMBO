@@ -14,6 +14,10 @@ typedef struct
     int ms;              // total amount if ticks in ms
     int uwtick_first;    // start timestamp
     int enabled;
+    int pwm_cnt;         // software PWM counter
+    int duty;            // software PWM duty cycle
+    int breath_cnt;      // keepalive breathing tick counter
+    int breath_dir;      // breathing direction (1 = fade in, 0 = fade out)
 }led_data_t;
 
 void led_init(led_data_t* self);

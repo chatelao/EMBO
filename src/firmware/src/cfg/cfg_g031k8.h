@@ -69,7 +69,7 @@
 #define EM_UART_POLLINIT                            // if defined poll for init
 
 // LED -------------------------------------------------------------
-//#define EM_LED                                    // LED enabled
+#define EM_LED                                    // LED enabled
 #define EM_LED_PORT            GPIOC                // main LED port
 #define EM_LED_PIN             6                    // main LED pin
 //#define EM_LED_INVERTED                           // inverted behavior
