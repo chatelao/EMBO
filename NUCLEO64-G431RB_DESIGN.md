@@ -11,6 +11,7 @@ The primary objective of the **STM32G431RB (Nucleo-64)** detailed design is to:
 * **Resolve Hardware Conflicts:** Remap conflicting on-board LED and analog pins to ensure waveform signal integrity and correct visual diagnostic feedbacks.
 * **Introduce Physical Interactions:** Integrate the blue onboard user button (B1) on `PC13` to enable headless control mode switches and local calibrations.
 * **Define Low-Level (LL) Architecture:** Establish concrete macro structures, interrupt routing configurations, DMAMUX assignments, and memory properties.
+* **Ensure Robust Button Debouncing:** Specify concrete, tick-gated hardware interrupt mechanisms to filter mechanical bounce without using CPU pooling or dynamic resources.
 
 ---
 
@@ -458,7 +459,109 @@ High-speed Logic Analyzer concurrent sampling relies on a single DMA port read o
 
 ---
 
-## 7. Summary of Discarded Alternatives
+### 6.4 Major Choice 4: User Button (B1) Input Gating and Debouncing Strategy
+
+To implement robust, headless mode switching and local calibration triggers, the mechanical blue User Button (B1) on `PC13` must be debounced to suppress contact bouncing transients.
+
+* **Alternative A (Selected): EXTI Gated Hardware Interrupt with Software Threshold Gating**
+  * *Description:* Route `PC13` to the `EXTI13` line. On a falling edge event, trigger the `EXTI15_10_IRQHandler`. Within this ISR, check the elapsed FreeRTOS system tick value since the last registered button press. If the elapsed time is less than a predefined threshold (e.g., 200 ms), the interrupt is discarded as contact bounce. Otherwise, process the state cycle event.
+  * *Pros:* Low overhead, highly responsive, zero periodic polling.
+  * *Cons:* Requires careful mapping of the `EXTI15_10` line and a global state variable to persist the last button press timestamp.
+* **Alternative B: Periodic Software Polling Task**
+  * *Description:* Execute a low-priority FreeRTOS HMI task that reads the input state of `PC13` every 20 ms.
+  * *Pros:* Straightforward, completely isolated from EXTI configurations.
+  * *Cons:* Consumes continuous processing cycles to wake up the HMI task periodically, decreasing energy efficiency.
+* **Alternative C: External Hardware RC Low-Pass Filter**
+  * *Description:* Add an RC low-pass filter circuit connected between the physical button and the GPIOC Pin 13 to filter out high-frequency contact bounce before it reaches the MCU input.
+  * *Pros:* Clean digital square wave, absolutely zero software overhead or interrupt complexity.
+  * *Cons:* Requires soldering physical components onto the developer board, hindering out-of-the-box software-only usability.
+
+---
+
+## 7. Technical Details for Choice 4: Button Configuration & ISR Blueprint
+
+### 7.1 Peripheral Register Settings & Gating Logic
+The selected **Alternative A** is configured programmatically through the low-level registers:
+1. **Clock Enable:** Enable clock gating for `GPIOC` and `SYSCFG` peripherals in the `RCC` register block.
+2. **GPIO Configuration:** Set `PC13` mode register to input (`MODER = 0x00`), with an internal pull-up (`PUPDR = 0x01`).
+3. **SYSCFG EXTI Routing:** Map external interrupt line 13 to `GPIOC` by writing `0x02` to the `EXTICR4` multiplexer register.
+4. **EXTI Configuration:** Enable falling-edge detection on Line 13 in the Falling Trigger Selection Register (`FTSR1`) and unmask the interrupt in the Interrupt Mask Register (`IMR1`).
+5. **NVIC Configuration:** Set priority for `EXTI15_10_IRQn` to `5` (`NVIC_SetPriority`) and enable the vector (`NVIC_EnableIRQ`).
+
+### 7.2 C Code Implementation Blueprint
+The following code snippet demonstrates the implementation of the EXTI button ISR with robust software gating:
+
+```c
+#include "cfg.h"
+#include "FreeRTOS.h"
+#include "task.h"
+
+// Variable to persist the last valid button press timestamp (in system ticks)
+static volatile TickType_t last_button_press_ticks = 0;
+
+// Gating threshold to filter out mechanical contact bounce (200 ms)
+#define DEBOUNCE_THRESHOLD_TICKS  pdMS_TO_TICKS(200)
+
+/**
+  * @brief  Initialize GPIOC Pin 13 as Input EXTI Falling Edge Interrupt
+  * @retval None
+  */
+void HMI_Button_Init(void)
+{
+    // 1. Enable AHB2/APB2 clocks for GPIOC and SYSCFG
+    LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOC);
+    LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_SYSCFG);
+
+    // 2. Configure PC13 as input with internal Pull-Up
+    LL_GPIO_SetPinMode(GPIOC, LL_GPIO_PIN_13, LL_GPIO_MODE_INPUT);
+    LL_GPIO_SetPinPull(GPIOC, LL_GPIO_PIN_13, LL_GPIO_PULL_UP);
+
+    // 3. Connect EXTI Line 13 to GPIOC Pin 13 via SYSCFG
+    LL_SYSCFG_SetEXTISource(LL_SYSCFG_EXTI_PORTC, LL_SYSCFG_EXTI_LINE13);
+
+    // 4. Configure EXTI Line 13: falling edge trigger & unmask
+    LL_EXTI_EnableIT_0_31(LL_EXTI_LINE_13);
+    LL_EXTI_EnableFallingTrig_0_31(LL_EXTI_LINE_13);
+
+    // 5. Configure NVIC for EXTI15_10 interrupts
+    NVIC_SetPriority(EXTI15_10_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 5, 0));
+    NVIC_EnableIRQ(EXTI15_10_IRQn);
+}
+
+/**
+  * @brief  EXTI Line 15 to 10 Interrupt Handler (Gated Debounce)
+  * @retval None
+  */
+void EXTI15_10_IRQHandler(void)
+{
+    // Check if interrupt flag on Line 13 is set
+    if (LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_13) != RESET)
+    {
+        // Retrieve current system uptime in ticks (safe inside ISR)
+        TickType_t current_ticks = xTaskGetTickCountFromISR();
+
+        // Calculate ticks elapsed since the last registered press
+        TickType_t elapsed_ticks = current_ticks - last_button_press_ticks;
+
+        // Gating threshold check (reject events within DEBOUNCE_THRESHOLD_TICKS)
+        if (elapsed_ticks >= DEBOUNCE_THRESHOLD_TICKS)
+        {
+            // Record timestamp of this valid button press
+            last_button_press_ticks = current_ticks;
+
+            // Execute the HMI state machine cycle (e.g., transition EMBO modes)
+            HMI_Cycle_Operating_Mode();
+        }
+
+        // Clear the pending EXTI interrupt flag
+        LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_13);
+    }
+}
+```
+
+---
+
+## 8. Summary of Discarded Alternatives
 
 * **Choice 1 (Alternative B - Passive Coexistence on PA5):** Discarded. The capacitive load of the LD2 circuit heavily distorts the DAC waveform, particularly at higher frequencies, violating the high-fidelity oscilloscope design goal.
 * **Choice 1 (Alternative C - Software Time-Multiplexing on PA5):** Discarded due to lack of real-time diagnostic feedbacks during the most critical operation window (active generation).
@@ -466,3 +569,5 @@ High-speed Logic Analyzer concurrent sampling relies on a single DMA port read o
 * **Choice 2 (Alternative C - Software Bit-Banged Serial):** Discarded. High interrupt overhead causes task starvation and crashes FreeRTOS scheduler under maximum DAQ workloads.
 * **Choice 3 (Alternative B - Scatter Pins Over Ports):** Discarded because introducing clock skew destroys the timing integrity and utility of the Logic Analyzer tool.
 * **Choice 3 (Alternative C - Remap entirely to GPIOC):** Discarded due to MCU ADC-hardware routing limitations that prevent interleaved dual-ADC operation on these specific pins.
+* **Choice 4 (Alternative B - Periodic Software Polling Task):** Discarded because periodic polling tasks waste valuable CPU cycles and increase power consumption when the button is inactive.
+* **Choice 4 (Alternative C - External Hardware RC Filter):** Discarded because it requires physical board modifications, conflicting with our goal of maintaining seamless out-of-the-box software-only compatibility.

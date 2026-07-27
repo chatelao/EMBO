@@ -1,6 +1,6 @@
-# NUCLEO46-G431RB Roadmap
+# NUCLEO64-G431RB Roadmap
 
-This document maps out the phases, goals, and step-by-step progress for porting, re-implementing, and verifying the EMBO (EMBedded Oscilloscope) firmware from the Nucleo-32 (STM32G431KB) to the Nucleo-64 (STM32G431RB) form factor, based on the detailed technical specifications in `DESIGN_NUCLEO46-G431RB.md`.
+This document maps out the phases, goals, and step-by-step progress for porting, re-implementing, and verifying the EMBO (EMBedded Oscilloscope) firmware from the Nucleo-32 (STM32G431KB) to the Nucleo-64 (STM32G431RB) form factor, based on the detailed technical specifications in `NUCLEO64-G431RB_DESIGN.md`.
 
 ---
 
@@ -50,7 +50,7 @@ Establish the physical folder structure and build configuration for the STM32G43
 Implement board-specific pin configurations and resolve on-board physical conflicts.
 
 - [ ] **Task 2.1: Implement Board Configuration Header (`cfg_g431rb.h`)** ⏳
-  - Create `src/firmware/src/cfg/cfg_g431rb.h` with the exact configurations detailed in `DESIGN_NUCLEO46-G431RB.md`.
+  - Create `src/firmware/src/cfg/cfg_g431rb.h` with the exact configurations detailed in `NUCLEO64-G431RB_DESIGN.md`.
   - Configure device identifiers: `EM_DEV_NAME` to `"EMBO-STM32G431RB-Nucleo64"`.
 - [ ] **Task 2.2: Resolve User LED Pin Conflict** ⏳
   - Map `EM_LED_PORT` to `GPIOB` and `EM_LED_PIN` to `13` (`PB13`).
@@ -69,7 +69,7 @@ Implement board-specific pin configurations and resolve on-board physical confli
 Establish conflict-free DMA channels routing via the DMAMUX router and ensure high-speed ADC interleaved acquisition.
 
 - [ ] **Task 3.1: Configure DMAMUX and DMA Layout** ⏳
-  - Program DMAMUX requests according to the map in `DESIGN_NUCLEO46-G431RB.md`:
+  - Program DMAMUX requests according to the map in `NUCLEO64-G431RB_DESIGN.md`:
     - DMA1 Ch1: ADC1 Regular (`LL_DMAMUX_REQ_ADC1`)
     - DMA1 Ch2: Logic Analyzer GPIOR IDR (`LL_DMAMUX_REQ_TIM15_CH1`)
     - DMA1 Ch3: ADC2 Regular (`LL_DMAMUX_REQ_ADC2`)
