@@ -66,10 +66,10 @@
 
 /*
  * =========layout=========
- *  DAQ CH1 ........... PA0 (ADC123_IN0)
- *  DAQ CH2 ........... PA1 (ADC123_IN1)
- *  DAQ CH3 ........... PA4 (ADC12_IN4)
- *  DAQ CH4 ........... PA5 (ADC12_IN5)
+ *  DAQ CH1 ........... PA0 (ADC123_IN0) - both ADC + LA
+ *  DAQ CH2 ........... PA1 (ADC123_IN1) - both ADC + LA
+ *  DAQ CH3 ........... PA6 (ADC12_IN6)  - both ADC + LA
+ *  DAQ CH4 ........... PA7 (ADC12_IN7)  - both ADC + LA
  *  PWM CH1 ........... PB10 (TIM2_CH3)
  *  PWM CH2 ........... PB8  (TIM4_CH3)
  *  CNTR .............. PC9  (TIM8_CH4)
@@ -88,8 +88,8 @@
 #define EM_LL_VER              "1.26.2"
 
 // pins ------------------------------------------------------------
-#define EM_PINS_SCOPE_VM       "A0-A1-A4-A5"
-#define EM_PINS_LA             "A0-A1-A4-A5"
+#define EM_PINS_SCOPE_VM       "A0-A1-A6-A7"
+#define EM_PINS_LA             "A0-A1-A6-A7"
 #define EM_PINS_CNTR           "C9"
 #define EM_PINS_PWM            "B8-B10"
 #define EM_PINS_SGEN           "A4-A5"
@@ -113,7 +113,7 @@
 // clock frequencies -----------------------------------------------
 #define EM_FREQ_LSI            32000     // LSI clock - watchdog
 #define EM_FREQ_HCLK           180000000 // HCLK clock - Core (180 MHz)
-#define EM_FREQ_ADCCLK         22500000  // ADC clock (APB2/8 = 180MHz/8 = 22.5MHz)
+#define EM_FREQ_ADCCLK         22500000  // ADC clock (APB2/4 = 90MHz/4 = 22.5MHz)
 #define EM_FREQ_PCLK1          45000000  // APB1 Clock (45 MHz)
 #define EM_FREQ_PCLK2          90000000  // APB2 Clock (90 MHz)
 #define EM_SYSTICK_FREQ        1000      // Systick clock
@@ -173,25 +173,26 @@
 #define EM_ADC_AWD                                             // Analog Watchdog (empty on STM32F4/F1 as SetAnalogWDMonitChannels takes 2 arguments)
 
 // Timers ----------------------------------------------------------
-#define EM_TIM_DAQ             TIM9  // Replaced TIM15 with TIM9
+// DAQ Timer configured to TIM1 (optimal choice on fast APB2 clock domain)
+#define EM_TIM_DAQ             TIM1
 #define EM_TIM_DAQ_MAX         65535
-#define EM_TIM_DAQ_FREQ        EM_FREQ_PCLK2
+#define EM_TIM_DAQ_FREQ        (EM_FREQ_PCLK2 * 2) // TIM1 runs on APB2 multiplied clock (180 MHz)
 #define EM_TIM_DAQ_CC(a)       a##CC1
 
 #define EM_TIM_PWM1            TIM2
 #define EM_TIM_PWM1_MAX        65535
-#define EM_TIM_PWM1_FREQ       EM_FREQ_PCLK1 * 2 // TIM2 input frequency is 90MHz
+#define EM_TIM_PWM1_FREQ       (EM_FREQ_PCLK1 * 2) // TIM2 input frequency is 90MHz
 #define EM_TIM_PWM1_CH         LL_TIM_CHANNEL_CH3
 #define EM_TIM_PWM1_CHN(a)     a##CH3
 
 #define EM_TIM_PWM2            TIM4
 #define EM_TIM_PWM2_MAX        65535
-#define EM_TIM_PWM2_FREQ       EM_FREQ_PCLK1 * 2 // TIM4 input frequency is 90MHz
+#define EM_TIM_PWM2_FREQ       (EM_FREQ_PCLK1 * 2) // TIM4 input frequency is 90MHz
 #define EM_TIM_PWM2_CH         LL_TIM_CHANNEL_CH3
 #define EM_TIM_PWM2_CHN(a)     a##CH3
 
 #define EM_TIM_CNTR            TIM8
-#define EM_TIM_CNTR_FREQ       EM_FREQ_PCLK2 * 2 // TIM8 input frequency is 180MHz
+#define EM_TIM_CNTR_FREQ       (EM_FREQ_PCLK2 * 2) // TIM8 input frequency is 180MHz
 #define EM_TIM_CNTR_UP_IRQh    TIM8_UP_TIM13_IRQHandler
 #define EM_TIM_CNTR_MAX        65535
 #define EM_TIM_CNTR_CH         LL_TIM_CHANNEL_CH4
@@ -204,10 +205,10 @@
 #define EM_TIM_CNTR_PSC_FAST   8
 
 #define EM_TIM_SGEN            TIM6
-#define EM_TIM_SGEN_FREQ       EM_FREQ_PCLK1 * 2
+#define EM_TIM_SGEN_FREQ       (EM_FREQ_PCLK1 * 2)
 #define EM_TIM_SGEN_MAX        65535
 #define EM_TIM_SGEN2           TIM7
-#define EM_TIM_SGEN2_FREQ      EM_FREQ_PCLK1 * 2
+#define EM_TIM_SGEN2_FREQ      (EM_FREQ_PCLK1 * 2)
 #define EM_TIM_SGEN2_MAX       65535
 
 // Memory Depth Allocation -----------------------------------------
@@ -237,20 +238,21 @@
 #define EM_DMA_SGEN            DMA1
 #define EM_DMA_SGEN2           DMA1
 
-#define EM_DMA_CH_ADC1         LL_DMA_STREAM_0
-#define EM_DMA_CH_ADC2         LL_DMA_STREAM_2
-#define EM_DMA_CH_LA           LL_DMA_STREAM_1
-#define EM_DMA_CH_CNTR         LL_DMA_STREAM_3
-#define EM_DMA_CH_CNTR2        LL_DMA_STREAM_4
-#define EM_DMA_CH_SGEN         LL_DMA_STREAM_5
-#define EM_DMA_CH_SGEN2        LL_DMA_STREAM_6
+// Stream Mapping corrected to match STM32F446 DMA2 request matrix
+#define EM_DMA_CH_ADC1         LL_DMA_STREAM_0  // ADC1 is on Stream 0 (Channel 0)
+#define EM_DMA_CH_ADC2         LL_DMA_STREAM_2  // ADC2 is on Stream 2 (Channel 1)
+#define EM_DMA_CH_LA           LL_DMA_STREAM_1  // TIM1_CH1 triggers DMA2 Stream 1 (Channel 6)
+#define EM_DMA_CH_CNTR         LL_DMA_STREAM_7  // TIM8_CH4 is exclusively routed to Stream 7 (Channel 7)
+#define EM_DMA_CH_CNTR2        LL_DMA_STREAM_4  // TIM8_CH3 is routed to Stream 4 (Channel 7)
+#define EM_DMA_CH_SGEN         LL_DMA_STREAM_5  // DAC1 is on DMA1 Stream 5 (Channel 7)
+#define EM_DMA_CH_SGEN2        LL_DMA_STREAM_6  // DAC2 is on DMA1 Stream 6 (Channel 7)
 
 #define EM_IRQN_ADC1           ADC_IRQn
 #define EM_IRQN_ADC2           ADC_IRQn
 #define EM_IRQN_UART           USART2_IRQn
 #define EM_LA_IRQ_EXTI1        EXTI0_IRQn
 #define EM_LA_IRQ_EXTI2        EXTI1_IRQn
-#define EM_LA_IRQ_EXTI3        EXTI4_IRQn
+#define EM_LA_IRQ_EXTI3        EXTI9_5_IRQn
 #define EM_LA_IRQ_EXTI4        EXTI9_5_IRQn
 #define EM_CNTR_IRQ            TIM8_UP_TIM13_IRQn
 
@@ -259,35 +261,37 @@
 
 // Logic Analyzer pins & EXTI ---------------------------------------
 #define EM_LA_EXTI_PORT        LL_SYSCFG_EXTI_PORTA
-#define EM_LA_EXTI1            LL_EXTI_LINE_0
-#define EM_LA_EXTI2            LL_EXTI_LINE_1
-#define EM_LA_EXTI3            LL_EXTI_LINE_4
-#define EM_LA_EXTI4            LL_EXTI_LINE_5
+#define EM_LA_EXTI1            LL_EXTI_LINE_0   // PA0
+#define EM_LA_EXTI2            LL_EXTI_LINE_1   // PA1
+#define EM_LA_EXTI3            LL_EXTI_LINE_6   // PA6
+#define EM_LA_EXTI4            LL_EXTI_LINE_7   // PA7
 #define EM_LA_EXTI_UNUSED      LL_EXTI_LINE_2
 #define EM_LA_EXTILINE1        LL_SYSCFG_EXTI_LINE0
 #define EM_LA_EXTILINE2        LL_SYSCFG_EXTI_LINE1
-#define EM_LA_EXTILINE3        LL_SYSCFG_EXTI_LINE4
-#define EM_LA_EXTILINE4        LL_SYSCFG_EXTI_LINE5
+#define EM_LA_EXTILINE3        LL_SYSCFG_EXTI_LINE6
+#define EM_LA_EXTILINE4        LL_SYSCFG_EXTI_LINE7
 
 #define EM_LA_CH1_IRQh         EXTI0_IRQHandler
 #define EM_LA_CH2_IRQh         EXTI1_IRQHandler
-#define EM_LA_CH3_IRQh         EXTI4_IRQHandler
-#define EM_LA_CH4_IRQh         EXTI9_5_IRQHandler
+#define EM_LA_CH3_IRQh         EXTI9_5_IRQHandler
+// EM_LA_CH4_IRQh is commented out to avoid double-definition of the EXTI9_5 vector.
+// Both CH3 and CH4 will share the same EXTI9_5 ISR.
+//#define EM_LA_CH4_IRQh         EXTI9_5_IRQHandler
 #define EM_LA_UNUSED_IRQh      EXTI2_IRQHandler
 
 #define EM_LA_IRQ1_CH1         la_irq_ch1
 #define EM_LA_IRQ2_CH2         la_irq_ch2
 #define EM_LA_IRQ3_CH3         la_irq_ch3
-#define EM_LA_IRQ4_CH4         la_irq_ch4
+#define EM_LA_IRQ3_CH4         la_irq_ch4   // Shared IRQ3 handler
 
 #define EM_ADC_AWD1            LL_ADC_AWD_CHANNEL_0_REG
 #define EM_ADC_AWD2            LL_ADC_AWD_CHANNEL_1_REG
-#define EM_ADC_AWD3            LL_ADC_AWD_CHANNEL_4_REG
-#define EM_ADC_AWD4            LL_ADC_AWD_CHANNEL_5_REG
+#define EM_ADC_AWD3            LL_ADC_AWD_CHANNEL_6_REG
+#define EM_ADC_AWD4            LL_ADC_AWD_CHANNEL_7_REG
 #define EM_ADC_CH1             LL_ADC_CHANNEL_0
 #define EM_ADC_CH2             LL_ADC_CHANNEL_1
-#define EM_ADC_CH3             LL_ADC_CHANNEL_4
-#define EM_ADC_CH4             LL_ADC_CHANNEL_5
+#define EM_ADC_CH3             LL_ADC_CHANNEL_6
+#define EM_ADC_CH4             LL_ADC_CHANNEL_7
 
 #define EM_GPIO_ADC_PORT1      GPIOA
 #define EM_GPIO_ADC_PORT2      GPIOA
@@ -295,20 +299,20 @@
 #define EM_GPIO_ADC_PORT4      GPIOA
 #define EM_GPIO_ADC_CH1        LL_GPIO_PIN_0
 #define EM_GPIO_ADC_CH2        LL_GPIO_PIN_1
-#define EM_GPIO_ADC_CH3        LL_GPIO_PIN_4
-#define EM_GPIO_ADC_CH4        LL_GPIO_PIN_5
+#define EM_GPIO_ADC_CH3        LL_GPIO_PIN_6
+#define EM_GPIO_ADC_CH4        LL_GPIO_PIN_7
 
 #define EM_GPIO_LA_PORT        GPIOA
 #define EM_GPIO_LA_OFFSET      0
 #define EM_GPIO_LA_CH1         LL_GPIO_PIN_0
 #define EM_GPIO_LA_CH2         LL_GPIO_PIN_1
-#define EM_GPIO_LA_CH3         LL_GPIO_PIN_4
-#define EM_GPIO_LA_CH4         LL_GPIO_PIN_5
+#define EM_GPIO_LA_CH3         LL_GPIO_PIN_6
+#define EM_GPIO_LA_CH4         LL_GPIO_PIN_7
 
 #define EM_GPIO_LA_CH1_NUM     0
 #define EM_GPIO_LA_CH2_NUM     1
-#define EM_GPIO_LA_CH3_NUM     4
-#define EM_GPIO_LA_CH4_NUM     5
+#define EM_GPIO_LA_CH3_NUM     6
+#define EM_GPIO_LA_CH4_NUM     7
 
 #endif
 #endif /* INC_CFG_CFG_F446RE_H_ */
