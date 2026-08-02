@@ -100,6 +100,14 @@ jobs:
           fi
           echo "Verified: STM32C542RC build artifacts successfully generated."
 
+      - name: Verify STM32G431RB build artifacts
+        run: |
+          if [ ! -f "src/firmware/board/STM32G431RB/build/STM32G431RB.bin" ] || [ ! -f "src/firmware/board/STM32G431RB/build/STM32G431RB.hex" ]; then
+            echo "Error: STM32G431RB build artifacts (.bin or .hex) were not generated!"
+            exit 1
+          fi
+          echo "Verified: STM32G431RB build artifacts successfully generated."
+
       - name: Show ccache stats (after)
         run: ccache -s
 

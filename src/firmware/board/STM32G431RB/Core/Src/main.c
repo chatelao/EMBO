@@ -918,7 +918,7 @@ static void MX_TIM15_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN TIM15_Init 2 */
-
+  LL_DMA_SetPeriphRequest(DMA1, LL_DMA_CHANNEL_2, LL_DMAMUX_REQ_TIM15_CH1);
   /* USER CODE END TIM15_Init 2 */
 
 }
