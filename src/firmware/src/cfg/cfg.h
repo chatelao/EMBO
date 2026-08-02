@@ -172,9 +172,8 @@
     #endif
 
 #elif defined(STM32G431xx)
-/*.................................................. L412KB .................................................*/
+/*.................................................. G431xx .................................................*/
 
-    #define EM_G431KB
     #define EM_CORTEX_M4F
     #define LL_ADC_MULTI_DUAL_REG_INTERL_FAST LL_ADC_MULTI_DUAL_REG_INTERL
 
@@ -185,7 +184,7 @@
      *  DAQ CH3 ........... PA6
      *  DAQ CH4 ........... PA7
      *  PWM CH1 ........... PA15
-     *  PWM CH2 ........... PB6
+     *  PWM CH2 ........... PB6 (for KB) / PB13 (for RB)
      *  CNTR .............. PA8
      *  DAC CH1 ........... PA4
      *  DAC CH2 ........... PA5
@@ -198,7 +197,12 @@
      *  =======================
      */
 
-    #include "cfg_g431kb.h"
+    #if defined(EM_G431RB)
+        #include "cfg_g431rb.h"
+    #else
+        #define EM_G431KB
+        #include "cfg_g431kb.h"
+    #endif
 
 #elif defined(STM32F446xx)
 /*.................................................. F446RE .................................................*/
