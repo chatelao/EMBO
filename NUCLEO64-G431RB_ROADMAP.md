@@ -10,8 +10,8 @@ This document maps out the phases, goals, and step-by-step progress for porting,
 |---|---|---|---|
 | **Phase 1** | Project Structuring & Directory Preparation | ✅ Completed | `src/firmware/board/STM32G431RB/` |
 | **Phase 2** | Board Configuration & Pin Remapping | ✅ Completed | `src/firmware/src/cfg/cfg_g431rb.h` |
-| **Phase 3** | High-Performance DAQ, DMA & DMAMUX Mapping | ⏳ Planned | `src/firmware/src/app/` |
-| **Phase 4** | HMI Controls, PC Client Handshake & Validation | ⏳ Planned | `scripts/` & `README.md` |
+| **Phase 3** | High-Performance DAQ, DMA & DMAMUX Mapping | ✅ Completed | `src/firmware/src/app/` |
+| **Phase 4** | HMI Controls, PC Client Handshake & Validation | ✅ Completed | `scripts/` & `README.md` |
 
 ---
 
@@ -21,7 +21,7 @@ This document maps out the phases, goals, and step-by-step progress for porting,
 * **Objective 2:** ✅ Completed | Remap the user LED (`EM_LED`) to PB13 to prevent hardware conflicts on PA5 (DAC1_OUT2).
 * **Objective 3:** ✅ Completed | Integrate physical blue button (B1) on PC13 for headless mode switching and local calibration.
 * **Objective 4:** ✅ Completed | Achieve error-free compilation of the STM32G431RB firmware target using `compile_firmware.py`.
-* **Objective 5:** ⏳ Confirm perfect compatibility with the EMBO Qt client handshake (`*IDN?`, `SYS:LIM?`, `SYS:INFO?`).
+* **Objective 5:** ✅ Completed | Confirm perfect compatibility with the EMBO Qt client handshake (`*IDN?`, `SYS:LIM?`, `SYS:INFO?`).
 
 ---
 
@@ -64,11 +64,11 @@ Implement board-specific pin configurations and resolve on-board physical confli
 
 ---
 
-### Phase 3: High-Performance DAQ, DMA & DMAMUX Mapping ⏳
+### Phase 3: High-Performance DAQ, DMA & DMAMUX Mapping ✅
 
 Establish conflict-free DMA channels routing via the DMAMUX router and ensure high-speed ADC interleaved acquisition.
 
-- [ ] **Task 3.1: Configure DMAMUX and DMA Layout** ⏳
+- [x] **Task 3.1: Configure DMAMUX and DMA Layout** ✅
   - Program DMAMUX requests according to the map in `NUCLEO64-G431RB_DESIGN.md`:
     - DMA1 Ch1: ADC1 Regular (`LL_DMAMUX_REQ_ADC1`)
     - DMA1 Ch2: Logic Analyzer GPIOR IDR (`LL_DMAMUX_REQ_TIM15_CH1`)
@@ -77,24 +77,24 @@ Establish conflict-free DMA channels routing via the DMAMUX router and ensure hi
     - DMA1 Ch5: DAC1 Channel 2 (`LL_DMAMUX_REQ_DAC1_CH2`)
     - DMA1 Ch6: Frequency Counter Direct (`LL_DMAMUX_REQ_TIM1_CH1`)
     - DMA2 Ch1: Frequency Counter Indirect (`LL_DMAMUX_REQ_TIM1_CH2`)
-- [ ] **Task 3.2: Verify Dual/Interleaved ADC Common Data Register (CDR) Addressing** ⏳
+- [x] **Task 3.2: Verify Dual/Interleaved ADC Common Data Register (CDR) Addressing** ✅
   - Ensure `EM_ADC_ADDR(x)` correctly targets the Common Regular Data Register (`CDR`) when dual-ADC multimode is active.
-- [ ] **Task 3.3: Map Scope and LA Pins** ⏳
+- [x] **Task 3.3: Map Scope and LA Pins** ✅
   - Align all 4 channels to `GPIOA` (PA0, PA1, PA6, PA7) to preserve concurrent, single-cycle DMA IDR reads for the Logic Analyzer.
 
 ---
 
-### Phase 4: HMI Controls, PC Client Handshake & Validation ⏳
+### Phase 4: HMI Controls, PC Client Handshake & Validation ✅
 
 Verify full software stack functionality, test serial/VCP handshakes, and finalize release documentation.
 
-- [ ] **Task 4.1: Compile-Time Verification** ⏳
+- [x] **Task 4.1: Compile-Time Verification** ✅
   - Integrate the `STM32G431RB` target into `scripts/compile_firmware.py`.
   - Perform compilation and verify that both binary (`.bin`) and hex (`.hex`) outputs are generated without any errors or warnings.
-- [ ] **Task 4.2: Emulated Handshake and Protocol Verification** ⏳
+- [x] **Task 4.2: Emulated Handshake and Protocol Verification** ✅
   - Test the connection handshake response using emulated queries:
     - `*IDN?` must return 4 comma-separated tokens matching firmware version `0.2.3` and target device.
     - `SYS:LIM?` must return exactly 17 comma-separated configuration limits.
     - `SYS:INFO?` must return exactly 10 comma-separated status values.
-- [ ] **Task 4.3: Document Target Integration** ⏳
+- [x] **Task 4.3: Document Target Integration** ✅
   - Update `README.md` and `README_cz.md` to list the STM32G431RB (Nucleo-64) as an officially supported stable hardware target.
