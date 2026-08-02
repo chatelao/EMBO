@@ -8,8 +8,8 @@ This document maps out the phases, goals, and step-by-step progress for porting,
 
 | Phase | Description | Status | Target/Resolution |
 |---|---|---|---|
-| **Phase 1** | Project Structuring & Directory Preparation | ⏳ Planned | `src/firmware/board/STM32G431RB/` |
-| **Phase 2** | Board Configuration & Pin Remapping | ⏳ Planned | `src/firmware/src/cfg/cfg_g431rb.h` |
+| **Phase 1** | Project Structuring & Directory Preparation | ✅ Completed | `src/firmware/board/STM32G431RB/` |
+| **Phase 2** | Board Configuration & Pin Remapping | ✅ Completed | `src/firmware/src/cfg/cfg_g431rb.h` |
 | **Phase 3** | High-Performance DAQ, DMA & DMAMUX Mapping | ⏳ Planned | `src/firmware/src/app/` |
 | **Phase 4** | HMI Controls, PC Client Handshake & Validation | ⏳ Planned | `scripts/` & `README.md` |
 
@@ -17,48 +17,48 @@ This document maps out the phases, goals, and step-by-step progress for porting,
 
 ## Goals
 
-* **Objective 1:** ⏳ Establish a clean STM32G431RB (Nucleo-64) project directory with full LL driver support.
-* **Objective 2:** ⏳ Remap the user LED (`EM_LED`) to PB13 to prevent hardware conflicts on PA5 (DAC1_OUT2).
-* **Objective 3:** ⏳ Integrate physical blue button (B1) on PC13 for headless mode switching and local calibration.
-* **Objective 4:** ⏳ Achieve error-free compilation of the STM32G431RB firmware target using `compile_firmware.py`.
+* **Objective 1:** ✅ Completed | Establish a clean STM32G431RB (Nucleo-64) project directory with full LL driver support.
+* **Objective 2:** ✅ Completed | Remap the user LED (`EM_LED`) to PB13 to prevent hardware conflicts on PA5 (DAC1_OUT2).
+* **Objective 3:** ✅ Completed | Integrate physical blue button (B1) on PC13 for headless mode switching and local calibration.
+* **Objective 4:** ✅ Completed | Achieve error-free compilation of the STM32G431RB firmware target using `compile_firmware.py`.
 * **Objective 5:** ⏳ Confirm perfect compatibility with the EMBO Qt client handshake (`*IDN?`, `SYS:LIM?`, `SYS:INFO?`).
 
 ---
 
 ## Phases
 
-### Phase 1: Project Structuring & Directory Preparation ⏳
+### Phase 1: Project Structuring & Directory Preparation ✅
 
 Establish the physical folder structure and build configuration for the STM32G431RB target.
 
-- [ ] **Task 1.1: Create Project Folder Structure** ⏳
+- [x] **Task 1.1: Create Project Folder Structure** ✅
   - Create the board directory `src/firmware/board/STM32G431RB/` patterned after the existing `STM32G431KB` target.
   - Set up standard subdirectories: `Core/`, `Drivers/`, and configuration files.
-- [ ] **Task 1.2: Import Low-Level (LL) Drivers** ⏳
+- [x] **Task 1.2: Import Low-Level (LL) Drivers** ✅
   - Ensure all required low-level drivers (`stm32g4xx_ll_*.h/c`) are correctly linked or imported into `Drivers/STM32G4xx_HAL_Driver/`.
-- [ ] **Task 1.3: Configure Project Build Files** ⏳
+- [x] **Task 1.3: Configure Project Build Files** ✅
   - Create and configure `.project`, `.cproject`, and `.mxproject` files targeting the LQFP64 STM32G431RBT6 MCU.
   - Add compile-time preprocessor definitions such as `STM32G431xx` and `EM_G431RB` to control feature gating.
-- [ ] **Task 1.4: Import Linker and Startup Files** ⏳
+- [x] **Task 1.4: Import Linker and Startup Files** ✅
   - Copy and adjust the linker script (`STM32G431RBTX_FLASH.ld`) with correct capacities (128 KB Flash, 32 KB SRAM).
   - Add the correct startup assembly file (`startup_stm32g431xx.s`).
 
 ---
 
-### Phase 2: Board Configuration & Pin Remapping ⏳
+### Phase 2: Board Configuration & Pin Remapping ✅
 
 Implement board-specific pin configurations and resolve on-board physical conflicts.
 
-- [ ] **Task 2.1: Implement Board Configuration Header (`cfg_g431rb.h`)** ⏳
+- [x] **Task 2.1: Implement Board Configuration Header (`cfg_g431rb.h`)** ✅
   - Create `src/firmware/src/cfg/cfg_g431rb.h` with the exact configurations detailed in `NUCLEO64-G431RB_DESIGN.md`.
   - Configure device identifiers: `EM_DEV_NAME` to `"EMBO-STM32G431RB-Nucleo64"`.
-- [ ] **Task 2.2: Resolve User LED Pin Conflict** ⏳
+- [x] **Task 2.2: Resolve User LED Pin Conflict** ✅
   - Map `EM_LED_PORT` to `GPIOB` and `EM_LED_PIN` to `13` (`PB13`).
   - This avoids severe waveform signal integrity degradation and visual noise on `PA5` (`DAC1_OUT2`).
-- [ ] **Task 2.3: Integrate Physical User Button (B1)** ⏳
+- [x] **Task 2.3: Integrate Physical User Button (B1)** ✅
   - Configure the HMI button mapping in `cfg_g431rb.h`: `EM_BTN_PORT` as `GPIOC`, `EM_BTN_PIN` as `13`.
   - Set up `EXTI15_10_IRQHandler` to trigger mode/calibration actions upon button click.
-- [ ] **Task 2.4: Central Configuration Dispatching** ⏳
+- [x] **Task 2.4: Central Configuration Dispatching** ✅
   - Integrate `cfg_g431rb.h` into the main `cfg.h` configuration dispatcher under the `EM_G431RB` compile symbol.
   - Define correct ADC sampling times in `cfg.c` for G431RB.
 
