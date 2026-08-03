@@ -17,6 +17,7 @@ Podporované MCU:
 - **STM32F303RE**
 - **STM32L412KB**
 - **STM32G431KB** (deska Nucleo-32 G431KB)
+- **STM32G431RB** (deska Nucleo-64 G431RB)
 - **STM32F446RE** (deska Nucleo-64 F446RE)
 - **STM32C542RC** (deska Nucleo-64 C542RC, koncepční cíl)
 
